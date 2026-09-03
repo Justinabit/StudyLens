@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>StudyLens Settings</title>
+  <link rel="stylesheet" href="options.css" />
+</head>
+<body>
+  <main class="settings">
+    <header class="settings-header">
+      <div class="settings-wordmark">
+        <img src="../icons/logo_mark.png" alt="" class="settings-wordmark-icon" />
+        <h1>StudyLens</h1>
+      </div>
+      <p>See what matters. Learn what counts. — Settings</p>
+    </header>
+
+    <section class="settings-card">
+      <h2>AI Provider</h2>
+      <p class="help">
+        StudyLens sends extracted text (from a webpage or an uploaded file) to this AI
+        service only when you use a study feature. It never sends anything automatically.
+      </p>
+
+      <label for="provider-select" class="field-label">Provider</label>
+      <select id="provider-select" class="select">
+        <option value="openai">OpenAI</option>
+        <option value="gemini">Google Gemini</option>
+        <option value="anthropic" disabled>Anthropic (coming soon)</option>
+      </select>
+
+      <label for="api-key-input" class="field-label">API key</label>
+      <div class="key-row">
+        <input id="api-key-input" type="password" class="text-input" placeholder="sk-… or AIza…" autocomplete="off" />
+        <button id="toggle-key-visibility" type="button" class="btn btn-secondary">Show</button>
+      </div>
+      <p id="provider-help" class="help">
+        Get an OpenAI key at platform.openai.com, or a free Gemini key at aistudio.google.com/apikey.
+      </p>
+      <p class="help">
+        Your key is stored only on this device (<code>chrome.storage.local</code>) and is
+        sent directly to your AI provider - never to StudyLens's developers. For a
+        personal, local extension this is normal, but a key stored in a browser
+        extension is not as protected as one kept on a private server. See the README
+        for details.
+      </p>
+    </section>
+
+    <section class="settings-card">
+      <h2>Study Preferences</h2>
+
+      <label for="reviewer-mode-select" class="field-label">Default reviewer length</label>
+      <select id="reviewer-mode-select" class="select">
+        <option value="quick">Quick</option>
+        <option value="standard">Standard</option>
+        <option value="comprehensive" selected>Comprehensive (full reviewer)</option>
+      </select>
+
+      <label for="key-point-count-input" class="field-label">Number of key points</label>
+      <input id="key-point-count-input" type="number" min="3" max="12" class="text-input" />
+
+      <label class="checkbox-row">
+        <input type="checkbox" id="confirm-before-ai-checkbox" />
+        Ask for confirmation before sending extracted text to the AI service
+      </label>
+    </section>
+
+    <section class="settings-card">
+      <h2>Privacy</h2>
+      <p class="help">
+        StudyLens only reads a webpage when you click "Scan Current Page," and only
+        reads an uploaded file when you choose one. It does not track your browsing
+        history, watch other tabs, or use your camera, microphone, or location.
+      </p>
+      <p class="help">
+        Uploaded files (PDF, Word, PowerPoint, TXT, Markdown, CSV, RTF) are opened and
+        read entirely inside your browser, using local parsing libraries bundled with
+        the extension - the file itself is never uploaded anywhere. When you use a
+        study feature (Summary, Key Points, Full Reviewer, Highlight), the
+        <strong>extracted text</strong> - from the webpage or the file - is sent to the
+        AI provider configured above, the same way it is for a scanned webpage.
+      </p>
+      <p class="help">
+        Extracted text, results, and highlights exist only in the side panel while it's
+        open and are not saved anywhere by StudyLens.
+      </p>
+      <button id="clear-data-btn" class="btn btn-secondary">Clear all StudyLens data on this device</button>
+    </section>
+
+    <div class="save-row">
+      <button id="save-btn" class="btn btn-primary">Save Settings</button>
+      <span id="save-status" class="save-status" aria-live="polite"></span>
+    </div>
+  </main>
+
+  <script src="../constants.js"></script>
+  <script src="options.js"></script>
+</body>
+</html>

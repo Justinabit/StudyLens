@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>StudyLens</title>
+  <link rel="stylesheet" href="sidepanel.css" />
+</head>
+<body>
+
+  <!-- ============================================================ -->
+  <!-- ONBOARDING (shown once, first run only)                       -->
+  <!-- ============================================================ -->
+  <div id="onboarding-overlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="onboarding-title">
+    <div class="overlay-card">
+      <h2 id="onboarding-title">Welcome to StudyLens</h2>
+      <p>
+        StudyLens turns a webpage or your own study files into a summary, key
+        points, and a full reviewer you can study from.
+      </p>
+      <ul class="onboarding-list">
+        <li>StudyLens reads a webpage only when you click "Scan Current Page."</li>
+        <li>Uploaded files are read locally in your browser to extract text - see Settings for exactly what's sent to your AI provider.</li>
+        <li>It never needs your camera, microphone, or location.</li>
+        <li>AI features send the extracted text to your chosen AI service for processing.</li>
+      </ul>
+      <button id="onboarding-dismiss" class="btn btn-primary">Got It</button>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- AI DATA DISCLOSURE (shown before first AI use)                -->
+  <!-- ============================================================ -->
+  <div id="disclosure-overlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="disclosure-title">
+    <div class="overlay-card">
+      <h2 id="disclosure-title">Send this to your AI service?</h2>
+      <p id="disclosure-body">
+        To generate this study material, the extracted text will be sent to the AI
+        provider configured in Settings for processing.
+      </p>
+      <div class="overlay-actions">
+        <button id="disclosure-cancel" class="btn btn-secondary">Cancel</button>
+        <button id="disclosure-continue" class="btn btn-primary">Continue</button>
+      </div>
+      <label class="checkbox-row">
+        <input type="checkbox" id="disclosure-dont-ask" />
+        Don't ask again (change anytime in Settings)
+      </label>
+    </div>
+  </div>
+
+  <div class="app-shell">
+
+    <!-- HEADER (stays visible while the content below scrolls) -->
+    <header class="app-header">
+      <div class="header-row">
+        <div class="wordmark">
+          <img src="../icons/logo_mark.png" alt="" class="wordmark-icon" />
+          <span class="wordmark-text">StudyLens</span>
+        </div>
+        <button id="settings-btn" class="icon-btn" aria-label="Settings" title="Settings">⚙</button>
+      </div>
+      <p class="tagline">See what matters. Learn what counts.</p>
+    </header>
+
+    <!-- SCROLLABLE MAIN CONTENT -->
+    <main class="app-scroll">
+
+      <!-- SOURCE -->
+      <section class="card">
+        <h2 class="eyebrow">Source</h2>
+
+        <div class="source-toggle" role="tablist">
+          <button id="source-tab-page" class="source-tab" role="tab" aria-selected="true" type="button">🌐 Webpage</button>
+          <button id="source-tab-file" class="source-tab" role="tab" aria-selected="false" type="button">📁 File</button>
+        </div>
+
+        <!-- Webpage source panel -->
+        <div id="source-panel-page" class="source-panel">
+          <p id="page-title" class="page-title">Loading current tab…</p>
+          <p id="page-domain" class="page-domain"></p>
+          <p id="page-status" class="status" aria-live="polite">Ready to analyze</p>
+          <button id="read-page-btn" class="btn btn-primary btn-full">Scan Current Page</button>
+        </div>
+
+        <!-- File source panel -->
+        <div id="source-panel-file" class="source-panel hidden">
+          <div id="file-drop-zone" class="file-drop-zone">
+            <p class="file-drop-title">Upload Study Material</p>
+            <p class="file-drop-formats">Supported: PDF, Word, PowerPoint, TXT, Markdown, CSV, RTF (max 25 MB)</p>
+            <button id="choose-file-btn" class="btn btn-secondary" type="button">Choose File</button>
+            <input type="file" id="file-input" class="hidden" />
+          </div>
+
+          <div id="file-info" class="file-info hidden">
+            <p id="file-name" class="file-name"></p>
+            <p id="file-meta" class="file-meta"></p>
+            <button id="remove-file-btn" class="btn btn-secondary btn-full" type="button">Remove File</button>
+          </div>
+        </div>
+
+        <p id="source-current-label" class="source-current-label"></p>
+      </section>
+
+      <!-- LOADING (used for both page reading and file extraction) -->
+      <section id="loading-card" class="card hidden">
+        <p id="loading-message" class="loading-message" aria-live="polite"></p>
+      </section>
+
+      <!-- CONTENT PREVIEW -->
+      <section id="preview-section" class="card hidden">
+        <h2 class="eyebrow">Content Detected</h2>
+        <p id="preview-word-count" class="word-count"></p>
+        <blockquote id="preview-text" class="preview-text"></blockquote>
+        <button id="preview-continue-btn" class="btn btn-secondary btn-full" type="button">Continue</button>
+      </section>
+
+      <!-- WHAT WOULD YOU LIKE -->
+      <section id="study-tools-section" class="card hidden">
+        <h2 class="eyebrow">What would you like?</h2>
+        <div class="btn-grid">
+          <button id="summarize-btn" class="btn btn-secondary" type="button">Summary</button>
+          <button id="key-points-btn" class="btn btn-secondary" type="button">Key Points</button>
+          <button id="highlight-btn" class="btn btn-secondary" type="button">Highlight Important Parts</button>
+        </div>
+
+        <div id="highlight-controls" class="highlight-controls hidden">
+          <div class="highlight-nav">
+            <button id="highlight-prev-btn" class="btn btn-icon" type="button" aria-label="Previous highlight">← Previous</button>
+            <span id="highlight-position" class="highlight-position">Highlight 0 of 0</span>
+            <button id="highlight-next-btn" class="btn btn-icon" type="button" aria-label="Next highlight">Next →</button>
+          </div>
+          <button id="remove-highlights-btn" class="btn btn-secondary btn-full" type="button">Remove Highlights</button>
+        </div>
+
+        <div class="reviewer-block">
+          <span class="field-label">Reviewer length</span>
+          <div id="reviewer-mode-group" class="segmented" role="radiogroup" aria-label="Reviewer length">
+            <button type="button" class="segment" data-mode="quick">Quick</button>
+            <button type="button" class="segment" data-mode="standard">Standard</button>
+            <button type="button" class="segment" data-mode="comprehensive">Comprehensive</button>
+          </div>
+          <button id="reviewer-btn" class="btn btn-primary btn-full" type="button">Generate Full Reviewer</button>
+        </div>
+
+        <div class="btn-grid btn-grid-tight">
+          <button id="quiz-prompt-btn" class="btn btn-secondary" type="button" disabled>Quiz Prompt</button>
+          <button id="flashcard-prompt-btn" class="btn btn-secondary" type="button" disabled>Flashcard Prompt</button>
+        </div>
+        <p id="prompt-hint" class="hint">Generate a summary or reviewer first to build quiz/flashcard prompts.</p>
+      </section>
+
+      <!-- RESULT -->
+      <section id="result-section" class="card hidden">
+        <h2 class="eyebrow">Result</h2>
+        <div id="result-tabs" class="tabs" role="tablist"></div>
+        <div id="result-chunk-note" class="hint hidden"></div>
+        <div id="result-text" class="result-text" role="tabpanel" tabindex="0"></div>
+        <div class="btn-grid btn-grid-tight-2">
+          <button id="regenerate-btn" class="btn btn-secondary" type="button">Regenerate</button>
+          <button id="clear-btn" class="btn btn-secondary" type="button">Clear</button>
+        </div>
+      </section>
+
+      <div class="scroll-spacer"></div>
+    </main>
+
+    <!-- STICKY PRIMARY ACTION -->
+    <footer id="sticky-footer" class="sticky-footer hidden">
+      <button id="copy-btn" class="btn btn-primary btn-full" type="button">Copy</button>
+    </footer>
+
+  </div>
+
+  <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
+
+  <script src="../vendor/jszip/jszip.min.js"></script>
+  <script src="../vendor/papaparse/papaparse.min.js"></script>
+  <script src="../vendor/mammoth/mammoth.browser.min.js"></script>
+  <script src="../constants.js"></script>
+  <script src="../aiService.js"></script>
+  <script src="fileParser.js"></script>
+  <script src="sidepanel.js"></script>
+</body>
+</html>

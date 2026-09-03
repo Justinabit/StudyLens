@@ -1,0 +1,23 @@
+/*
+  highlight.css
+  -------------
+  Injected into the webpage only when the student uses "Highlight Important
+  Parts". Kept intentionally small: it must never change the page's layout,
+  only the appearance of the exact text StudyLens marks.
+*/
+
+mark.studylens-highlight {
+  background-color: #ffe28a;
+  color: inherit;
+  padding: 0 1px;
+  border-radius: 2px;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+  transition: background-color 0.2s ease;
+}
+
+mark.studylens-highlight.studylens-highlight-focus {
+  background-color: #ffc857;
+  outline: 2px solid #14213d;
+  outline-offset: 1px;
+}
