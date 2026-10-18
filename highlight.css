@@ -1,23 +1,44 @@
 /*
   highlight.css
   -------------
-  Injected into the webpage only when the student uses "Highlight Important
-  Parts". Kept intentionally small: it must never change the page's layout,
-  only the appearance of the exact text StudyLens marks.
+  Injected into the webpage only when the student scans it. Kept small: it
+  must never change the page's layout, only the appearance of the exact
+  text StudyLens marks.
 */
 
 mark.studylens-highlight {
-  background-color: #ffe28a;
-  color: inherit;
+  background-color: rgba(255, 210, 84, 0.7);
+  color: #1b2430; /* readable on light and dark sites alike */
   padding: 0 1px;
-  border-radius: 2px;
+  border-radius: 3px;
   box-decoration-break: clone;
   -webkit-box-decoration-break: clone;
-  transition: background-color 0.2s ease;
+  transition: background-color 0.25s ease, box-shadow 0.25s ease;
+  animation: studylens-mark-in 0.7s ease both;
 }
 
 mark.studylens-highlight.studylens-highlight-focus {
-  background-color: #ffc857;
-  outline: 2px solid #14213d;
-  outline-offset: 1px;
+  /* No outline rings: a passage that spans several links is several <mark>s,
+     and a deeper fill with an underline reads as one continuous highlight. */
+  background-color: #ffb627;
+  box-shadow: 0 2px 0 0 #14213d;
+  animation: studylens-flash 1.2s ease-out 1;
+}
+
+@keyframes studylens-mark-in {
+  from { background-color: rgba(255, 210, 84, 0); }
+  to { background-color: rgba(255, 210, 84, 0.7); }
+}
+
+@keyframes studylens-flash {
+  0%, 35% { background-color: #ff9f1c; }
+  100% { background-color: #ffb627; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  mark.studylens-highlight,
+  mark.studylens-highlight.studylens-highlight-focus {
+    animation: none;
+    transition: none;
+  }
 }

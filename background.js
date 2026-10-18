@@ -2,63 +2,73 @@
   background.js
   -------------
   StudyLens keeps this file small on purpose (see README > Background
-  Service Worker). It does not run continuously or watch tabs - it only
-  wakes up to:
-    1. Handle AI generation requests from the popup.
-    2. Set sensible default settings the first time StudyLens is installed.
+  Service Worker). It does not watch tabs or make AI requests (those run in
+  the side panel - see the note at the top of aiService.js). It only wakes
+  up to:
+    1. Save default settings on install, and upgrade settings from 1.x.
+    2. Make the toolbar icon open the side panel.
+    3. Handle the right-click menu ("Explain with StudyLens" /
+       "Study selected text with StudyLens").
 */
 
-importScripts("constants.js", "aiService.js");
+importScripts("constants.js");
 
-chrome.runtime.onInstalled.addListener((details) => {
-  if (details.reason === "install") {
-    chrome.storage.local.set({ [STORAGE_KEYS.SETTINGS]: DEFAULT_SETTINGS });
-  }
+const MENU_IDS = {
+  EXPLAIN: "studylens-explain-selection",
+  STUDY: "studylens-study-selection"
+};
+
+chrome.runtime.onInstalled.addListener(async () => {
+  const stored = await chrome.storage.local.get(STORAGE_KEYS.SETTINGS);
+  await chrome.storage.local.set({ [STORAGE_KEYS.SETTINGS]: normalizeSettings(stored[STORAGE_KEYS.SETTINGS]) });
+
+  chrome.contextMenus.removeAll(() => {
+    chrome.contextMenus.create({ id: MENU_IDS.EXPLAIN, title: "Explain “%s” with StudyLens", contexts: ["selection"] });
+    chrome.contextMenus.create({ id: MENU_IDS.STUDY, title: "Study selected text with StudyLens", contexts: ["selection"] });
+  });
 });
 
-// StudyLens's interface is a side panel (full-height, low-scroll) rather
-// than a small popup - see README > Why a Side Panel. This makes the
-// toolbar icon open it directly.
+// StudyLens's interface is a side panel (full-height, stays open while you
+// browse) rather than a small popup - see README > Why a Side Panel.
 chrome.sidePanel
   .setPanelBehavior({ openPanelOnActionClick: true })
   .catch((err) => console.error("StudyLens: could not set side panel behavior.", err));
 
-async function getSettings() {
-  const stored = await chrome.storage.local.get(STORAGE_KEYS.SETTINGS);
-  return { ...DEFAULT_SETTINGS, ...(stored[STORAGE_KEYS.SETTINGS] || {}) };
-}
+chrome.contextMenus.onClicked.addListener((info, tab) => {
+  if (!tab || (info.menuItemId !== MENU_IDS.EXPLAIN && info.menuItemId !== MENU_IDS.STUDY)) return;
 
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (!message || !Object.values(MESSAGE_TYPES).includes(message.type)) {
-    return false; // not a message this file handles (e.g. content-script pings)
-  }
+  // sidePanel.open() only works during the click itself, so it must be
+  // called before anything is awaited.
+  chrome.sidePanel.open({ windowId: tab.windowId }).catch((err) => console.error("StudyLens: could not open the side panel.", err));
 
-  handleGenerationRequest(message)
-    .then((result) => sendResponse({ ok: true, ...result }))
-    .catch((err) => sendResponse({ ok: false, error: err.message || "Something went wrong while contacting the AI service." }));
-
-  return true; // keep the message channel open for the async response above
+  queuePendingAction(info, tab);
 });
 
-async function handleGenerationRequest(message) {
-  const settings = await getSettings();
-  const { aiProvider, apiKey, reviewerMode, keyPointCount } = settings;
-  const text = message.textContent || "";
-
-  switch (message.type) {
-    case MESSAGE_TYPES.GENERATE_SUMMARY:
-      return generateSummary(aiProvider, apiKey, text);
-
-    case MESSAGE_TYPES.GENERATE_KEY_POINTS:
-      return generateKeyPoints(aiProvider, apiKey, text, keyPointCount);
-
-    case MESSAGE_TYPES.GENERATE_REVIEWER:
-      return generateReviewer(aiProvider, apiKey, text, reviewerMode);
-
-    case MESSAGE_TYPES.GENERATE_HIGHLIGHT_PHRASES:
-      return generateHighlightPhrases(aiProvider, apiKey, text, message.count);
-
-    default:
-      throw new Error("Unsupported generation request.");
+// The side panel picks this up from storage.session (memory only) as soon
+// as it's open - see sidepanel.js > handlePendingAction.
+async function queuePendingAction(info, tab) {
+  let text = info.selectionText || "";
+  try {
+    // The menu's selectionText loses line breaks; read the selection itself
+    // when the page allows it (the right-click grants activeTab).
+    const [result] = await chrome.scripting.executeScript({
+      target: { tabId: tab.id, frameIds: [info.frameId || 0] },
+      func: () => String(window.getSelection() || "")
+    });
+    if (result && result.result && result.result.trim().length >= text.trim().length) text = result.result;
+  } catch (err) {
+    // Some pages (PDF viewer, Chrome pages) can't be scripted - keep selectionText.
   }
+
+  await chrome.storage.session.set({
+    [STORAGE_KEYS.PENDING_ACTION]: {
+      type: info.menuItemId === MENU_IDS.EXPLAIN ? "explain" : "study",
+      text: text.trim(),
+      title: tab.title || "",
+      url: tab.url || info.pageUrl || "",
+      tabId: tab.id,
+      windowId: tab.windowId,
+      at: Date.now()
+    }
+  });
 }

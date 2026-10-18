@@ -2,176 +2,357 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>StudyLens</title>
   <link rel="stylesheet" href="sidepanel.css" />
 </head>
 <body>
 
-  <!-- ============================================================ -->
-  <!-- ONBOARDING (shown once, first run only)                       -->
-  <!-- ============================================================ -->
-  <div id="onboarding-overlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="onboarding-title">
-    <div class="overlay-card">
-      <h2 id="onboarding-title">Welcome to StudyLens</h2>
-      <p>
-        StudyLens turns a webpage or your own study files into a summary, key
-        points, and a full reviewer you can study from.
-      </p>
-      <ul class="onboarding-list">
-        <li>StudyLens reads a webpage only when you click "Scan Current Page."</li>
-        <li>Uploaded files are read locally in your browser to extract text - see Settings for exactly what's sent to your AI provider.</li>
-        <li>It never needs your camera, microphone, or location.</li>
-        <li>AI features send the extracted text to your chosen AI service for processing.</li>
-      </ul>
-      <button id="onboarding-dismiss" class="btn btn-primary">Got It</button>
-    </div>
-  </div>
-
-  <!-- ============================================================ -->
-  <!-- AI DATA DISCLOSURE (shown before first AI use)                -->
-  <!-- ============================================================ -->
-  <div id="disclosure-overlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="disclosure-title">
-    <div class="overlay-card">
-      <h2 id="disclosure-title">Send this to your AI service?</h2>
-      <p id="disclosure-body">
-        To generate this study material, the extracted text will be sent to the AI
-        provider configured in Settings for processing.
-      </p>
-      <div class="overlay-actions">
-        <button id="disclosure-cancel" class="btn btn-secondary">Cancel</button>
-        <button id="disclosure-continue" class="btn btn-primary">Continue</button>
-      </div>
-      <label class="checkbox-row">
-        <input type="checkbox" id="disclosure-dont-ask" />
-        Don't ask again (change anytime in Settings)
-      </label>
-    </div>
-  </div>
+  <!-- Icon set (stroke icons, drawn with currentColor) -->
+  <svg xmlns="http://www.w3.org/2000/svg" class="icon-sprite" aria-hidden="true">
+    <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9S9.5 5.6 12 3z"/></symbol>
+    <symbol id="i-file" viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h4"/></symbol>
+    <symbol id="i-slides" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M12 16v4M8 20h8"/></symbol>
+    <symbol id="i-sheet" viewBox="0 0 24 24"><rect x="4" y="3.5" width="16" height="17" rx="2"/><path d="M4 9h16M4 14.5h16M10 3.5v17"/></symbol>
+    <symbol id="i-quote" viewBox="0 0 24 24"><path d="M6 7h4v4c0 3-1.5 5-4 6M14 7h4v4c0 3-1.5 5-4 6"/></symbol>
+    <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 15V4"/><path d="M7.5 8.5 12 4l4.5 4.5"/><path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></symbol>
+    <symbol id="i-scan" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.3-4.3"/></symbol>
+    <symbol id="i-settings" viewBox="0 0 24 24"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></symbol>
+    <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M4.6 4.6 6 6M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4 6 18M18 6l1.4-1.4"/></symbol>
+    <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></symbol>
+    <symbol id="i-summary" viewBox="0 0 24 24"><path d="M4 6h16M4 10.5h16M4 15h10M4 19.5h7"/></symbol>
+    <symbol id="i-keypoints" viewBox="0 0 24 24"><path d="M10.5 6H20M10.5 12H20M10.5 18H20"/><path d="m3.5 6 1.5 1.5L7.5 5M3.5 12l1.5 1.5 2.5-2.5M3.5 18l1.5 1.5 2.5-2.5"/></symbol>
+    <symbol id="i-book" viewBox="0 0 24 24"><path d="M5 19.5V5a2 2 0 0 1 2-2h12v15H7a2 2 0 0 0-2 2 2 2 0 0 0 2 2h12"/><path d="M9 7.5h6"/></symbol>
+    <symbol id="i-quiz" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.2a2.6 2.6 0 0 1 5 .9c0 1.8-2.5 2.3-2.5 3.9"/><path d="M12 17.2h.01"/></symbol>
+    <symbol id="i-cards" viewBox="0 0 24 24"><rect x="3" y="7" width="13" height="14" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2h-3"/></symbol>
+    <symbol id="i-chat" viewBox="0 0 24 24"><path d="M20 14.5a2 2 0 0 1-2 2H8.5L4 20V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2z"/><path d="M8 9h8M8 12.5h5"/></symbol>
+    <symbol id="i-highlighter" viewBox="0 0 24 24"><path d="M15.5 4.5 19.5 8.5 10 18H6v-4z"/><path d="m13.5 6.5 4 4"/><path d="M3 21h11"/></symbol>
+    <symbol id="i-bulb" viewBox="0 0 24 24"><path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2V16h5v-.1c0-.8.4-1.5 1-2A6 6 0 0 0 12 3z"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15h-.5A1.5 1.5 0 0 1 3 13.5v-9A1.5 1.5 0 0 1 4.5 3h9A1.5 1.5 0 0 1 15 4.5V5"/></symbol>
+    <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4v11"/><path d="m7.5 10.5 4.5 4.5 4.5-4.5"/><path d="M5 20h14"/></symbol>
+    <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></symbol>
+    <symbol id="i-rotate" viewBox="0 0 24 24"><path d="M4 12a8 8 0 0 1 13.7-5.7L20 8.5"/><path d="M20 4v4.5h-4.5"/><path d="M20 12a8 8 0 0 1-13.7 5.7L4 15.5"/><path d="M4 20v-4.5h4.5"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></symbol>
+    <symbol id="i-chevron-left" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></symbol>
+    <symbol id="i-chevron-right" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></symbol>
+    <symbol id="i-chevron-down" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+    <symbol id="i-send" viewBox="0 0 24 24"><path d="M21 3 10 14"/><path d="m21 3-6.5 18-4-7.5-7.5-4z"/></symbol>
+    <symbol id="i-shuffle" viewBox="0 0 24 24"><path d="M16 4h4v4"/><path d="M4 20 20 4"/><path d="M20 16v4h-4"/><path d="m15 15 5 5"/><path d="m4 4 5 5"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16"/><path d="M9 7V4.5h6V7"/><path d="m6.5 7 1 13h9l1-13"/></symbol>
+    <symbol id="i-sparkles" viewBox="0 0 24 24"><path d="M11 3.5 12.8 8.2 17.5 10l-4.7 1.8L11 16.5l-1.8-4.7L4.5 10l4.7-1.8z"/><path d="m18.5 14.5.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z"/></symbol>
+    <symbol id="i-stop" viewBox="0 0 24 24"><rect x="6.5" y="6.5" width="11" height="11" rx="2"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 21s7.5-3.6 7.5-9.5V5.5L12 3 4.5 5.5v6C4.5 17.4 12 21 12 21z"/><path d="m9 12 2 2 4-4"/></symbol>
+    <symbol id="i-arrow-right" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></symbol>
+    <symbol id="i-arrow-up" viewBox="0 0 24 24"><path d="M12 19V5"/><path d="m6 11 6-6 6 6"/></symbol>
+    <symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1"/></symbol>
+    <symbol id="i-trophy" viewBox="0 0 24 24"><path d="M8 4h8v5a4 4 0 0 1-8 0z"/><path d="M8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4"/><path d="M12 13v4M8.5 20.5h7"/><path d="M10 17h4v3.5h-4z"/></symbol>
+    <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5.5M12 7.5h.01"/></symbol>
+    <symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 3.5 21.5 20h-19z"/><path d="M12 10v4.5M12 17.5h.01"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  </svg>
 
   <div class="app-shell">
 
     <!-- HEADER (stays visible while the content below scrolls) -->
     <header class="app-header">
-      <div class="header-row">
-        <div class="wordmark">
-          <img src="../icons/logo_mark.png" alt="" class="wordmark-icon" />
-          <span class="wordmark-text">StudyLens</span>
+      <div class="brand">
+        <img src="../icons/logo_mark.png" alt="" class="brand-mark" />
+        <div class="brand-copy">
+          <span class="brand-name">StudyLens</span>
+          <span class="brand-tagline">See what matters. Learn what counts.</span>
         </div>
-        <button id="settings-btn" class="icon-btn" aria-label="Settings" title="Settings">⚙</button>
       </div>
-      <p class="tagline">See what matters. Learn what counts.</p>
+      <div class="header-actions">
+        <button id="theme-btn" class="icon-btn" type="button" aria-label="Switch theme" title="Switch theme">
+          <svg class="icon icon-when-light" aria-hidden="true"><use href="#i-moon"></use></svg>
+          <svg class="icon icon-when-dark" aria-hidden="true"><use href="#i-sun"></use></svg>
+        </button>
+        <button id="settings-btn" class="icon-btn" type="button" aria-label="Settings" title="Settings">
+          <svg class="icon" aria-hidden="true"><use href="#i-settings"></use></svg>
+        </button>
+      </div>
+      <div id="activity-bar" class="activity-bar" aria-hidden="true"></div>
     </header>
 
     <!-- SCROLLABLE MAIN CONTENT -->
-    <main class="app-scroll">
+    <main id="app-scroll" class="app-scroll">
+
+      <!-- No API key yet -->
+      <section id="setup-banner" class="banner hidden" role="note">
+        <span class="banner-icon"><svg class="icon" aria-hidden="true"><use href="#i-sparkles"></use></svg></span>
+        <div class="banner-copy">
+          <strong>Connect an AI provider</strong>
+          <span>Add a free Gemini key (or OpenAI / Claude) to start generating study materials.</span>
+        </div>
+        <button id="setup-btn" class="btn btn-primary btn-small" type="button">Set up</button>
+      </section>
 
       <!-- SOURCE -->
-      <section class="card">
-        <h2 class="eyebrow">Source</h2>
-
-        <div class="source-toggle" role="tablist">
-          <button id="source-tab-page" class="source-tab" role="tab" aria-selected="true" type="button">🌐 Webpage</button>
-          <button id="source-tab-file" class="source-tab" role="tab" aria-selected="false" type="button">📁 File</button>
+      <section class="card source-card" aria-label="Choose what to study">
+        <div class="seg" role="tablist" aria-label="Source">
+          <span class="seg-thumb" aria-hidden="true"></span>
+          <button id="source-tab-page" class="seg-btn" role="tab" aria-selected="true" aria-controls="source-panel-page" type="button">
+            <svg class="icon" aria-hidden="true"><use href="#i-globe"></use></svg>Webpage
+          </button>
+          <button id="source-tab-file" class="seg-btn" role="tab" aria-selected="false" aria-controls="source-panel-file" type="button">
+            <svg class="icon" aria-hidden="true"><use href="#i-file"></use></svg>File
+          </button>
         </div>
 
-        <!-- Webpage source panel -->
-        <div id="source-panel-page" class="source-panel">
-          <p id="page-title" class="page-title">Loading current tab…</p>
-          <p id="page-domain" class="page-domain"></p>
-          <p id="page-status" class="status" aria-live="polite">Ready to analyze</p>
-          <button id="read-page-btn" class="btn btn-primary btn-full">Scan Current Page</button>
+        <div id="source-panel-page" class="source-panel" role="tabpanel" aria-labelledby="source-tab-page">
+          <div class="page-row">
+            <span class="page-favicon">
+              <img id="page-favicon" class="hidden" alt="" />
+              <svg id="page-favicon-fallback" class="icon" aria-hidden="true"><use href="#i-globe"></use></svg>
+            </span>
+            <div class="page-text">
+              <p id="page-title" class="page-title">Loading current tab…</p>
+              <p id="page-domain" class="page-domain"></p>
+            </div>
+          </div>
+          <p id="page-status" class="status hidden" aria-live="polite"></p>
+          <button id="read-page-btn" class="btn btn-primary btn-full btn-lg" type="button">
+            <svg class="icon" aria-hidden="true"><use href="#i-scan"></use></svg><span id="read-page-label">Scan this page</span>
+          </button>
+          <button id="grant-access-btn" class="btn btn-ghost btn-full btn-small hidden" type="button">
+            <svg class="icon" aria-hidden="true"><use href="#i-shield"></use></svg>Let StudyLens read any tab I scan
+          </button>
         </div>
 
-        <!-- File source panel -->
-        <div id="source-panel-file" class="source-panel hidden">
-          <div id="file-drop-zone" class="file-drop-zone">
-            <p class="file-drop-title">Upload Study Material</p>
-            <p class="file-drop-formats">Supported: PDF, Word, PowerPoint, TXT, Markdown, CSV, RTF (max 25 MB)</p>
-            <button id="choose-file-btn" class="btn btn-secondary" type="button">Choose File</button>
+        <div id="source-panel-file" class="source-panel hidden" role="tabpanel" aria-labelledby="source-tab-file">
+          <div id="file-drop-zone" class="drop-zone" role="button" tabindex="0" aria-label="Upload a study file">
+            <span class="drop-icon"><svg class="icon" aria-hidden="true"><use href="#i-upload"></use></svg></span>
+            <p class="drop-title">Drop a file here or <span class="drop-link">browse</span></p>
+            <p class="drop-formats">PDF · Word · PowerPoint · TXT · Markdown · CSV · RTF · HTML<br />up to 25 MB, read locally in your browser</p>
             <input type="file" id="file-input" class="hidden" />
           </div>
+        </div>
 
-          <div id="file-info" class="file-info hidden">
-            <p id="file-name" class="file-name"></p>
-            <p id="file-meta" class="file-meta"></p>
-            <button id="remove-file-btn" class="btn btn-secondary btn-full" type="button">Remove File</button>
+        <div id="extract-progress" class="extract-progress hidden" aria-live="polite">
+          <div class="meter"><span id="extract-progress-fill"></span></div>
+          <p id="extract-progress-text" class="extract-progress-text"></p>
+        </div>
+      </section>
+
+      <!-- FIRST-RUN EMPTY STATE -->
+      <section id="empty-state" class="empty-state">
+        <img src="../icons/logo_mark.png" class="empty-logo" alt="" />
+        <h2>Turn anything into a study session</h2>
+        <ol class="empty-steps">
+          <li><span class="step-num">1</span><span>Scan a page, or drop in your notes, slides, or PDF</span></li>
+          <li><span class="step-num">2</span><span>Get a summary, a full reviewer, a quiz, or flashcards</span></li>
+          <li><span class="step-num">3</span><span>Ask follow-up questions until it clicks</span></li>
+        </ol>
+        <p class="empty-tip">
+          <svg class="icon" aria-hidden="true"><use href="#i-bulb"></use></svg>
+          <span>Select text on any page, right-click, and choose <strong>Explain with StudyLens</strong>.</span>
+        </p>
+      </section>
+
+      <!-- CURRENT SOURCE -->
+      <section id="content-card" class="card content-card hidden">
+        <div class="content-head">
+          <span id="content-icon" class="content-icon"></span>
+          <div class="content-info">
+            <p class="eyebrow">Now studying</p>
+            <p id="content-title" class="content-title"></p>
+            <p id="content-meta" class="content-meta"></p>
+          </div>
+          <button id="close-content-btn" class="icon-btn icon-btn-small" type="button" aria-label="Close this source" title="Close this source">
+            <svg class="icon" aria-hidden="true"><use href="#i-x"></use></svg>
+          </button>
+        </div>
+        <div id="content-chips" class="chips"></div>
+        <p id="content-notice" class="notice hidden"></p>
+        <details class="preview">
+          <summary><svg class="icon" aria-hidden="true"><use href="#i-chevron-down"></use></svg>Preview extracted text</summary>
+          <div id="preview-text" class="preview-text"></div>
+        </details>
+        <button id="export-all-btn" class="btn btn-ghost btn-small hidden" type="button">
+          <svg class="icon" aria-hidden="true"><use href="#i-download"></use></svg>Download study pack (.md)
+        </button>
+      </section>
+
+      <!-- STUDY TOOLS -->
+      <section id="tools-card" class="card tools-card hidden">
+        <h2 class="eyebrow">Study tools</h2>
+        <div class="tool-grid">
+          <button class="tool" data-tool="summary" type="button">
+            <span class="tool-icon"><svg class="icon" aria-hidden="true"><use href="#i-summary"></use></svg></span>
+            <span class="tool-name">Summary</span><span class="tool-desc">The big picture</span>
+            <span class="tool-status" aria-hidden="true"></span>
+          </button>
+          <button class="tool" data-tool="keyPoints" type="button">
+            <span class="tool-icon"><svg class="icon" aria-hidden="true"><use href="#i-keypoints"></use></svg></span>
+            <span class="tool-name">Key Points</span><span class="tool-desc">What to remember</span>
+            <span class="tool-status" aria-hidden="true"></span>
+          </button>
+          <button class="tool" data-tool="reviewer" type="button">
+            <span class="tool-icon"><svg class="icon" aria-hidden="true"><use href="#i-book"></use></svg></span>
+            <span class="tool-name">Reviewer</span><span class="tool-desc">Full study guide</span>
+            <span class="tool-status" aria-hidden="true"></span>
+          </button>
+          <button class="tool" data-tool="quiz" type="button">
+            <span class="tool-icon"><svg class="icon" aria-hidden="true"><use href="#i-quiz"></use></svg></span>
+            <span class="tool-name">Quiz</span><span class="tool-desc">Test yourself</span>
+            <span class="tool-status" aria-hidden="true"></span>
+          </button>
+          <button class="tool" data-tool="flashcards" type="button">
+            <span class="tool-icon"><svg class="icon" aria-hidden="true"><use href="#i-cards"></use></svg></span>
+            <span class="tool-name">Flashcards</span><span class="tool-desc">Flip &amp; memorize</span>
+            <span class="tool-status" aria-hidden="true"></span>
+          </button>
+          <button class="tool" data-tool="ask" type="button">
+            <span class="tool-icon"><svg class="icon" aria-hidden="true"><use href="#i-chat"></use></svg></span>
+            <span class="tool-name">Ask</span><span class="tool-desc">Chat about it</span>
+            <span class="tool-status" aria-hidden="true"></span>
+          </button>
+          <button class="tool tool-wide" data-tool="highlight" type="button">
+            <span class="tool-icon"><svg class="icon" aria-hidden="true"><use href="#i-highlighter"></use></svg></span>
+            <span class="tool-name">Highlight on page</span><span class="tool-desc">Mark the key passages right on the webpage</span>
+            <span class="tool-status" aria-hidden="true"></span>
+          </button>
+        </div>
+
+        <div class="tool-option">
+          <span class="field-label" id="reviewer-depth-label">Reviewer depth</span>
+          <div id="reviewer-mode-group" class="pills" role="radiogroup" aria-labelledby="reviewer-depth-label">
+            <button type="button" class="pill" role="radio" data-mode="quick">Quick</button>
+            <button type="button" class="pill" role="radio" data-mode="standard">Standard</button>
+            <button type="button" class="pill" role="radio" data-mode="comprehensive">Comprehensive</button>
           </div>
         </div>
 
-        <p id="source-current-label" class="source-current-label"></p>
-      </section>
-
-      <!-- LOADING (used for both page reading and file extraction) -->
-      <section id="loading-card" class="card hidden">
-        <p id="loading-message" class="loading-message" aria-live="polite"></p>
-      </section>
-
-      <!-- CONTENT PREVIEW -->
-      <section id="preview-section" class="card hidden">
-        <h2 class="eyebrow">Content Detected</h2>
-        <p id="preview-word-count" class="word-count"></p>
-        <blockquote id="preview-text" class="preview-text"></blockquote>
-        <button id="preview-continue-btn" class="btn btn-secondary btn-full" type="button">Continue</button>
-      </section>
-
-      <!-- WHAT WOULD YOU LIKE -->
-      <section id="study-tools-section" class="card hidden">
-        <h2 class="eyebrow">What would you like?</h2>
-        <div class="btn-grid">
-          <button id="summarize-btn" class="btn btn-secondary" type="button">Summary</button>
-          <button id="key-points-btn" class="btn btn-secondary" type="button">Key Points</button>
-          <button id="highlight-btn" class="btn btn-secondary" type="button">Highlight Important Parts</button>
-        </div>
-
-        <div id="highlight-controls" class="highlight-controls hidden">
+        <div id="highlight-panel" class="highlight-panel hidden">
           <div class="highlight-nav">
-            <button id="highlight-prev-btn" class="btn btn-icon" type="button" aria-label="Previous highlight">← Previous</button>
-            <span id="highlight-position" class="highlight-position">Highlight 0 of 0</span>
-            <button id="highlight-next-btn" class="btn btn-icon" type="button" aria-label="Next highlight">Next →</button>
+            <button id="highlight-prev-btn" class="icon-btn" type="button" aria-label="Previous highlight" title="Previous highlight">
+              <svg class="icon" aria-hidden="true"><use href="#i-chevron-left"></use></svg>
+            </button>
+            <span id="highlight-position" class="highlight-position">0 of 0</span>
+            <button id="highlight-next-btn" class="icon-btn" type="button" aria-label="Next highlight" title="Next highlight">
+              <svg class="icon" aria-hidden="true"><use href="#i-chevron-right"></use></svg>
+            </button>
+            <button id="remove-highlights-btn" class="btn btn-ghost btn-small" type="button">
+              <svg class="icon" aria-hidden="true"><use href="#i-x"></use></svg>Remove
+            </button>
           </div>
-          <button id="remove-highlights-btn" class="btn btn-secondary btn-full" type="button">Remove Highlights</button>
+          <ol id="highlight-list" class="highlight-list"></ol>
         </div>
 
-        <div class="reviewer-block">
-          <span class="field-label">Reviewer length</span>
-          <div id="reviewer-mode-group" class="segmented" role="radiogroup" aria-label="Reviewer length">
-            <button type="button" class="segment" data-mode="quick">Quick</button>
-            <button type="button" class="segment" data-mode="standard">Standard</button>
-            <button type="button" class="segment" data-mode="comprehensive">Comprehensive</button>
+        <div class="external-row">
+          <span class="field-label">Prefer ChatGPT or another AI assistant?</span>
+          <div class="external-btns">
+            <button id="quiz-prompt-btn" class="btn btn-ghost btn-small" type="button">
+              <svg class="icon" aria-hidden="true"><use href="#i-copy"></use></svg>Copy quiz prompt
+            </button>
+            <button id="flashcard-prompt-btn" class="btn btn-ghost btn-small" type="button">
+              <svg class="icon" aria-hidden="true"><use href="#i-copy"></use></svg>Copy flashcard prompt
+            </button>
           </div>
-          <button id="reviewer-btn" class="btn btn-primary btn-full" type="button">Generate Full Reviewer</button>
         </div>
-
-        <div class="btn-grid btn-grid-tight">
-          <button id="quiz-prompt-btn" class="btn btn-secondary" type="button" disabled>Quiz Prompt</button>
-          <button id="flashcard-prompt-btn" class="btn btn-secondary" type="button" disabled>Flashcard Prompt</button>
-        </div>
-        <p id="prompt-hint" class="hint">Generate a summary or reviewer first to build quiz/flashcard prompts.</p>
       </section>
 
-      <!-- RESULT -->
-      <section id="result-section" class="card hidden">
-        <h2 class="eyebrow">Result</h2>
-        <div id="result-tabs" class="tabs" role="tablist"></div>
-        <div id="result-chunk-note" class="hint hidden"></div>
-        <div id="result-text" class="result-text" role="tabpanel" tabindex="0"></div>
-        <div class="btn-grid btn-grid-tight-2">
-          <button id="regenerate-btn" class="btn btn-secondary" type="button">Regenerate</button>
-          <button id="clear-btn" class="btn btn-secondary" type="button">Clear</button>
-        </div>
+      <!-- RESULTS -->
+      <section id="result-card" class="card result-card hidden">
+        <div id="result-tabs" class="result-tabs" role="tablist" aria-label="Your study materials"></div>
+        <div id="result-note" class="hint hidden"></div>
+        <div id="view-text" class="view md hidden" role="tabpanel" tabindex="0"></div>
+        <div id="view-quiz" class="view hidden" role="tabpanel"></div>
+        <div id="view-flashcards" class="view hidden" role="tabpanel"></div>
+        <div id="view-ask" class="view hidden" role="tabpanel"></div>
       </section>
+
+      <!-- Floating progress for whatever the AI is working on -->
+      <div id="working" class="job-pill hidden" aria-live="polite">
+        <div class="working-row">
+          <span class="spinner" aria-hidden="true"></span>
+          <span id="working-text" class="working-text">Working…</span>
+          <button id="cancel-btn" class="btn btn-ghost btn-small" type="button">
+            <svg class="icon" aria-hidden="true"><use href="#i-stop"></use></svg>Stop
+          </button>
+        </div>
+        <div id="working-meter" class="meter meter-thin is-indeterminate"><span id="working-fill"></span></div>
+      </div>
 
       <div class="scroll-spacer"></div>
     </main>
 
-    <!-- STICKY PRIMARY ACTION -->
-    <footer id="sticky-footer" class="sticky-footer hidden">
-      <button id="copy-btn" class="btn btn-primary btn-full" type="button">Copy</button>
+    <button id="to-top-btn" class="to-top" type="button" aria-label="Back to top" title="Back to top">
+      <svg class="icon" aria-hidden="true"><use href="#i-arrow-up"></use></svg>
+    </button>
+
+    <!-- STICKY ACTIONS -->
+    <footer id="app-footer" class="app-footer hidden">
+      <div id="footer-actions" class="footer-actions">
+        <button id="copy-btn" class="btn btn-primary" type="button">
+          <svg class="icon" aria-hidden="true"><use href="#i-copy"></use></svg><span id="copy-label">Copy</span>
+        </button>
+        <button id="download-btn" class="icon-btn" type="button" aria-label="Download" title="Download">
+          <svg class="icon" aria-hidden="true"><use href="#i-download"></use></svg>
+        </button>
+        <button id="regenerate-btn" class="icon-btn" type="button" aria-label="Regenerate" title="Regenerate">
+          <svg class="icon" aria-hidden="true"><use href="#i-refresh"></use></svg>
+        </button>
+        <button id="delete-btn" class="icon-btn" type="button" aria-label="Delete this result" title="Delete this result">
+          <svg class="icon" aria-hidden="true"><use href="#i-trash"></use></svg>
+        </button>
+      </div>
+      <form id="ask-form" class="ask-form hidden" autocomplete="off">
+        <textarea id="ask-input" rows="1" placeholder="Ask anything about this material…" aria-label="Ask a question about this material"></textarea>
+        <button id="ask-send-btn" class="send-btn" type="submit" aria-label="Send question" title="Send (Enter)">
+          <svg class="icon" aria-hidden="true"><use href="#i-send"></use></svg>
+        </button>
+      </form>
     </footer>
 
   </div>
 
-  <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
+  <!-- ONBOARDING (first run only) -->
+  <div id="onboarding-overlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="onboarding-title">
+    <div class="overlay-card onboarding-card">
+      <img src="../icons/logo_mark.png" class="onboarding-logo" alt="" />
+      <h2 id="onboarding-title">Welcome to StudyLens</h2>
+      <p class="onboarding-lead">Turn webpages and your own files into summaries, reviewers, quizzes, and flashcards.</p>
+      <ul class="feature-list">
+        <li>
+          <span class="feature-icon"><svg class="icon" aria-hidden="true"><use href="#i-scan"></use></svg></span>
+          <span><strong>You're in control.</strong> StudyLens reads a page only when you click Scan. Files are read locally in your browser.</span>
+        </li>
+        <li>
+          <span class="feature-icon"><svg class="icon" aria-hidden="true"><use href="#i-sparkles"></use></svg></span>
+          <span><strong>Bring your own AI.</strong> Extracted text goes only to the provider you pick in Settings - Gemini has a free tier.</span>
+        </li>
+        <li>
+          <span class="feature-icon"><svg class="icon" aria-hidden="true"><use href="#i-shield"></use></svg></span>
+          <span><strong>Private by design.</strong> No accounts, no tracking, no camera, microphone, or location.</span>
+        </li>
+      </ul>
+      <div class="overlay-actions">
+        <button id="onboarding-settings" class="btn btn-secondary" type="button">Set up AI</button>
+        <button id="onboarding-dismiss" class="btn btn-primary" type="button">Get started</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONFIRMATION DIALOG (AI disclosure, replacing a session) -->
+  <div id="dialog-overlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="dialog-title" aria-describedby="dialog-body">
+    <div class="overlay-card">
+      <h2 id="dialog-title"></h2>
+      <p id="dialog-body"></p>
+      <label id="dialog-check-row" class="checkbox-row hidden">
+        <input type="checkbox" id="dialog-check" />
+        <span id="dialog-check-label"></span>
+      </label>
+      <div class="overlay-actions">
+        <button id="dialog-cancel" class="btn btn-secondary" type="button">Cancel</button>
+        <button id="dialog-confirm" class="btn btn-primary" type="button">Continue</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast-stack" class="toast-stack" role="status" aria-live="polite"></div>
+  <div id="confetti" class="confetti" aria-hidden="true"></div>
 
   <script src="../vendor/jszip/jszip.min.js"></script>
   <script src="../vendor/papaparse/papaparse.min.js"></script>
@@ -179,6 +360,8 @@
   <script src="../constants.js"></script>
   <script src="../aiService.js"></script>
   <script src="fileParser.js"></script>
+  <script src="markdown.js"></script>
+  <script src="studyModes.js"></script>
   <script src="sidepanel.js"></script>
 </body>
 </html>
