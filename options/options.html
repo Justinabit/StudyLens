@@ -2,98 +2,177 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>StudyLens Settings</title>
   <link rel="stylesheet" href="options.css" />
 </head>
 <body>
   <main class="settings">
     <header class="settings-header">
-      <div class="settings-wordmark">
-        <img src="../icons/logo_mark.png" alt="" class="settings-wordmark-icon" />
+      <img src="../icons/logo_mark.png" alt="" class="settings-logo" />
+      <div>
         <h1>StudyLens</h1>
+        <p>See what matters. Learn what counts. · Settings</p>
       </div>
-      <p>See what matters. Learn what counts. — Settings</p>
+      <span id="save-status" class="save-status" role="status" aria-live="polite"></span>
     </header>
 
+    <!-- AI PROVIDER -->
     <section class="settings-card">
-      <h2>AI Provider</h2>
+      <h2>AI provider</h2>
       <p class="help">
-        StudyLens sends extracted text (from a webpage or an uploaded file) to this AI
-        service only when you use a study feature. It never sends anything automatically.
+        StudyLens sends extracted text (from a webpage, a file, or text you selected) to this provider
+        only when you use a study tool. It never sends anything on its own.
       </p>
 
-      <label for="provider-select" class="field-label">Provider</label>
-      <select id="provider-select" class="select">
-        <option value="openai">OpenAI</option>
-        <option value="gemini">Google Gemini</option>
-        <option value="anthropic" disabled>Anthropic (coming soon)</option>
-      </select>
+      <div id="provider-group" class="provider-group" role="radiogroup" aria-label="AI provider"></div>
 
-      <label for="api-key-input" class="field-label">API key</label>
-      <div class="key-row">
-        <input id="api-key-input" type="password" class="text-input" placeholder="sk-… or AIza…" autocomplete="off" />
-        <button id="toggle-key-visibility" type="button" class="btn btn-secondary">Show</button>
+      <div class="field">
+        <div class="field-head">
+          <label for="api-key-input" class="field-label">API key</label>
+          <a id="key-link" class="field-link" href="#" target="_blank" rel="noopener">Get a key ↗</a>
+        </div>
+        <div class="key-row">
+          <input id="api-key-input" type="password" class="text-input" autocomplete="off" spellcheck="false" />
+          <button id="toggle-key-visibility" type="button" class="btn btn-secondary">Show</button>
+        </div>
+        <p id="provider-help" class="help small"></p>
+        <p id="key-warning" class="inline-warning hidden"></p>
       </div>
-      <p id="provider-help" class="help">
-        Get an OpenAI key at platform.openai.com, or a free Gemini key at aistudio.google.com/apikey.
-      </p>
-      <p class="help">
-        Your key is stored only on this device (<code>chrome.storage.local</code>) and is
-        sent directly to your AI provider - never to StudyLens's developers. For a
-        personal, local extension this is normal, but a key stored in a browser
-        extension is not as protected as one kept on a private server. See the README
-        for details.
+
+      <div class="field">
+        <label for="model-input" class="field-label">Model <span class="optional">(optional)</span></label>
+        <input id="model-input" type="text" class="text-input" autocomplete="off" spellcheck="false" />
+        <p class="help small">Leave blank to use the recommended model shown. Change it if your provider retires a model name.</p>
+      </div>
+
+      <div class="test-row">
+        <button id="test-btn" type="button" class="btn btn-primary">Test connection</button>
+        <span id="test-status" class="test-status" aria-live="polite"></span>
+      </div>
+
+      <p class="help small">
+        Your keys are stored only on this device (<code>chrome.storage.local</code>) and are sent
+        directly to the provider - never to StudyLens's developers. A key stored in a browser
+        extension isn't as protected as one kept on a server, so don't use StudyLens on shared computers
+        with a key that has a large spending limit.
       </p>
     </section>
 
+    <!-- STUDY PREFERENCES -->
     <section class="settings-card">
-      <h2>Study Preferences</h2>
+      <h2>Study preferences</h2>
 
-      <label for="reviewer-mode-select" class="field-label">Default reviewer length</label>
-      <select id="reviewer-mode-select" class="select">
-        <option value="quick">Quick</option>
-        <option value="standard">Standard</option>
-        <option value="comprehensive" selected>Comprehensive (full reviewer)</option>
-      </select>
-
-      <label for="key-point-count-input" class="field-label">Number of key points</label>
-      <input id="key-point-count-input" type="number" min="3" max="12" class="text-input" />
+      <div class="grid-2">
+        <div class="field">
+          <label for="language-select" class="field-label">Write results in</label>
+          <select id="language-select" class="select"></select>
+        </div>
+        <div class="field">
+          <label for="reviewer-mode-select" class="field-label">Default reviewer depth</label>
+          <select id="reviewer-mode-select" class="select">
+            <option value="quick">Quick</option>
+            <option value="standard">Standard</option>
+            <option value="comprehensive">Comprehensive (full reviewer)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="quiz-count-select" class="field-label">Quiz questions</label>
+          <select id="quiz-count-select" class="select">
+            <option value="5">5</option>
+            <option value="10">10</option>
+            <option value="15">15</option>
+            <option value="20">20</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="quiz-difficulty-select" class="field-label">Quiz difficulty</label>
+          <select id="quiz-difficulty-select" class="select">
+            <option value="easy">Easy - recall</option>
+            <option value="mixed">Mixed</option>
+            <option value="hard">Hard - application</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="flashcard-count-select" class="field-label">Flashcards per set</label>
+          <select id="flashcard-count-select" class="select">
+            <option value="10">10</option>
+            <option value="15">15</option>
+            <option value="20">20</option>
+            <option value="30">30</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="key-point-count-input" class="field-label">Key points: <output id="key-point-count-value"></output></label>
+          <input id="key-point-count-input" type="range" min="3" max="15" step="1" class="range" />
+        </div>
+      </div>
 
       <label class="checkbox-row">
         <input type="checkbox" id="confirm-before-ai-checkbox" />
-        Ask for confirmation before sending extracted text to the AI service
+        <span>Ask me before sending extracted text to the AI provider (once per panel session)</span>
       </label>
     </section>
 
+    <!-- APPEARANCE -->
+    <section class="settings-card">
+      <h2>Appearance</h2>
+      <div class="grid-2">
+        <div class="field">
+          <span class="field-label" id="theme-label">Theme</span>
+          <div id="theme-group" class="pills" role="radiogroup" aria-labelledby="theme-label">
+            <button type="button" class="pill" role="radio" data-value="system">System</button>
+            <button type="button" class="pill" role="radio" data-value="light">Light</button>
+            <button type="button" class="pill" role="radio" data-value="dark">Dark</button>
+          </div>
+        </div>
+        <div class="field">
+          <span class="field-label" id="text-size-label">Text size</span>
+          <div id="text-size-group" class="pills" role="radiogroup" aria-labelledby="text-size-label">
+            <button type="button" class="pill" role="radio" data-value="sm">Small</button>
+            <button type="button" class="pill" role="radio" data-value="md">Default</button>
+            <button type="button" class="pill" role="radio" data-value="lg">Large</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SHORTCUTS -->
+    <section class="settings-card">
+      <h2>Shortcuts</h2>
+      <ul class="shortcut-list">
+        <li><kbd>Alt</kbd> + <kbd>Shift</kbd> + <kbd>S</kbd> <span>opens StudyLens</span></li>
+        <li><span class="kbd-text">Right-click selected text</span> <span>→ <strong>Explain with StudyLens</strong> or <strong>Study selected text</strong></span></li>
+        <li><span class="kbd-text">In a quiz</span> <span><kbd>A</kbd>–<kbd>D</kbd> to answer, <kbd>Enter</kbd> for next</span></li>
+        <li><span class="kbd-text">With flashcards</span> <span><kbd>Space</kbd> flip, <kbd>←</kbd> <kbd>→</kbd> move, <kbd>1</kbd> still learning, <kbd>2</kbd> got it</span></li>
+      </ul>
+      <button id="shortcuts-btn" type="button" class="btn btn-secondary">Change keyboard shortcut</button>
+    </section>
+
+    <!-- PRIVACY -->
     <section class="settings-card">
       <h2>Privacy</h2>
       <p class="help">
-        StudyLens only reads a webpage when you click "Scan Current Page," and only
-        reads an uploaded file when you choose one. It does not track your browsing
-        history, watch other tabs, or use your camera, microphone, or location.
+        StudyLens only reads a webpage when you click "Scan," and only reads a file when you choose one.
+        It doesn't track your browsing, watch other tabs, or use your camera, microphone, or location.
       </p>
       <p class="help">
-        Uploaded files (PDF, Word, PowerPoint, TXT, Markdown, CSV, RTF) are opened and
-        read entirely inside your browser, using local parsing libraries bundled with
-        the extension - the file itself is never uploaded anywhere. When you use a
-        study feature (Summary, Key Points, Full Reviewer, Highlight), the
-        <strong>extracted text</strong> - from the webpage or the file - is sent to the
-        AI provider configured above, the same way it is for a scanned webpage.
+        Uploaded files (PDF, Word, PowerPoint, TXT, Markdown, CSV, RTF, HTML) are read entirely inside your
+        browser using libraries bundled with the extension - the file itself is never uploaded. When you use
+        a study tool, the <strong>extracted text</strong> is sent to the AI provider above.
       </p>
       <p class="help">
-        Extracted text, results, and highlights exist only in the side panel while it's
-        open and are not saved anywhere by StudyLens.
+        Your current study session (source text and results) is kept in Chrome's memory-only session storage
+        so it survives closing the panel. It's cleared when you close the browser, and never written to disk.
       </p>
-      <button id="clear-data-btn" class="btn btn-secondary">Clear all StudyLens data on this device</button>
+      <button id="clear-data-btn" type="button" class="btn btn-danger">Clear all StudyLens data on this device</button>
     </section>
 
-    <div class="save-row">
-      <button id="save-btn" class="btn btn-primary">Save Settings</button>
-      <span id="save-status" class="save-status" aria-live="polite"></span>
-    </div>
+    <p class="footer-note">Changes save automatically.</p>
   </main>
 
   <script src="../constants.js"></script>
+  <script src="../aiService.js"></script>
   <script src="options.js"></script>
 </body>
 </html>

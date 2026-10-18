@@ -1505,11 +1505,24 @@ function renderResults() {
         );
       })
       .join("");
+    reveal(els.resultCard);
+    keepActiveTabVisible();
   }
 
   reveal(els.resultCard);
   renderActiveView();
   updateFooter();
+}
+
+// Scrolls only the tab row (never the panel) so the selected tab is visible.
+function keepActiveTabVisible() {
+  const row = els.resultTabs;
+  const tab = row.querySelector('[aria-selected="true"]');
+  if (!tab) return;
+  const left = tab.offsetLeft;
+  const right = left + tab.offsetWidth;
+  if (left < row.scrollLeft + 12) row.scrollLeft = Math.max(0, left - 12);
+  else if (right > row.scrollLeft + row.clientWidth - 28) row.scrollLeft = right - row.clientWidth + 28;
 }
 
 function renderActiveView() {
@@ -1572,7 +1585,7 @@ function renderTextView(view) {
   }
 
   // Long reviewers get a clickable table of contents.
-  const sections = Array.from(els.viewText.querySelectorAll("h2[id]"));
+  const sections = view === "reviewer" ? Array.from(els.viewText.querySelectorAll("h2[id]")) : [];
   if (sections.length >= 3) {
     const toc = document.createElement("details");
     toc.className = "toc";
@@ -1958,13 +1971,18 @@ function showToast(message, type, options) {
 // JavaScript error.
 function friendlyMessage(err, fallback) {
   if (err instanceof AIError || err instanceof FileParseError) return err.message;
+  if (err && /^(TypeError|ReferenceError|SyntaxError|RangeError)$/.test(err.name)) return fallback;
   const message = (err && err.message) || "";
   const technical = /TypeError|undefined|null is not|Cannot read|ReferenceError|Receiving end does not exist|Could not establish connection|message port closed/i.test(message);
   return !message || technical ? fallback : message;
 }
 
 function handleError(err, fallback) {
-  console.error("StudyLens:", err);
+  // Expected problems (bad key, unreadable file…) are explained in the toast;
+  // only unexpected ones are logged, so chrome://extensions doesn't flag
+  // ordinary mistakes as extension errors.
+  if (err instanceof AIError || err instanceof FileParseError) console.warn("StudyLens:", err.message);
+  else console.error("StudyLens:", err);
   const settingsCodes = ["auth", "no-key", "model", "quota", "config"];
   const action =
     err && settingsCodes.includes(err.code) ? { label: "Settings", onClick: () => chrome.runtime.openOptionsPage() } : null;

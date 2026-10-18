@@ -37,11 +37,14 @@ const CORRUPT_FILE_MESSAGE =
  *  Small shared helpers (kept local to this file, same pattern as content.js)
  * ---------------------------------------------------------------------- */
 
+// Collapses runs of spaces inside lines but keeps each line's leading
+// indentation, which is how nested list items are marked.
 function cleanWhitespaceFP(text) {
   return (text || "")
     .replace(/\r\n?/g, "\n")
-    .replace(/[ \t ]+/g, " ")
-    .replace(/ *\n */g, "\n")
+    .replace(/\u00a0/g, " ")
+    .replace(/(\S)[ \t]+/g, "$1 ")
+    .replace(/[ \t]+\n/g, "\n")
     .replace(/\n{3,}/g, "\n\n")
     .trim();
 }
@@ -75,9 +78,10 @@ function getPdfjsLib() {
 async function parsePDF(arrayBuffer, onProgress) {
   const pdfjsLib = await getPdfjsLib();
 
+  const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
   let pdf;
   try {
-    pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    pdf = await loadingTask.promise;
   } catch (err) {
     if (err && err.name === "PasswordException") {
       throw new FileParseError("password", "This PDF is password-protected. Remove the password and upload it again.");
@@ -98,7 +102,7 @@ async function parsePDF(arrayBuffer, onProgress) {
       // preserves headings, bullets, and paragraphs instead of one long run.
       const pageText = content.items.map((item) => (item.str || "") + (item.hasEOL ? "\n" : " ")).join("");
       totalReadableChars += pageText.replace(/\s/g, "").length;
-      const cleaned = cleanWhitespaceFP(pageText);
+      const cleaned = cleanWhitespaceFP(pageText).replace(/^[ \t]+/gm, "");
       if (cleaned) pageBlocks.push("## Page " + i + "\n" + cleaned);
       page.cleanup();
     }
@@ -109,7 +113,7 @@ async function parsePDF(arrayBuffer, onProgress) {
       scanned: totalReadableChars / Math.max(numPages, 1) < 20 // almost no text per page = likely scanned images
     };
   } finally {
-    pdf.destroy();
+    loadingTask.destroy(); // frees the worker and its memory (available in every pdf.js version)
   }
 }
 
@@ -120,7 +124,11 @@ async function parsePDF(arrayBuffer, onProgress) {
 async function parseDOCX(arrayBuffer) {
   let result;
   try {
-    result = await mammoth.convertToHtml({ arrayBuffer });
+    result = await mammoth.convertToHtml(
+      { arrayBuffer },
+      // Word's Title/Subtitle styles aren't headings by default.
+      { styleMap: ["p[style-name='Title'] => h1:fresh", "p[style-name='Subtitle'] => h2:fresh"] }
+    );
   } catch (err) {
     throw new FileParseError("corrupt", CORRUPT_FILE_MESSAGE);
   }

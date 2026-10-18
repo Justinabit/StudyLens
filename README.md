@@ -2,378 +2,370 @@
 
 **See what matters. Learn what counts.**
 
-StudyLens is an AI-powered study assistant for students, built as a Google
-Chrome Extension. Give it a webpage **or your own PDF / Word / PowerPoint /
-text file**, and it turns the material into a summary, key points, on-page
-highlights, and a complete study reviewer — all of which you can copy and
-paste into any AI assistant (ChatGPT, Gemini, Claude, Copilot, etc.) to
-generate quizzes and flashcards.
+StudyLens is an AI study assistant for students, built as a Google Chrome
+extension. Give it a webpage, **your own PDF / Word / PowerPoint / text
+file**, or just some selected text, and it turns the material into a
+summary, key points, a full reviewer, an interactive quiz, flip-card
+flashcards, on-page highlights, and a tutor you can ask follow-up questions.
 
-StudyLens runs as a **side panel** (not a popup) so it can use the full
-height of your browser window instead of a small, scroll-heavy box.
+StudyLens runs in Chrome's **side panel**, so it stays open next to what
+you're reading while you browse.
 
 ---
 
 ## Contents
 
+- [What's New in 2.0](#whats-new-in-20)
 - [Features](#features)
-- [Technology](#technology)
-- [Project Structure](#project-structure)
-- [Installation (Chrome Setup)](#installation-chrome-setup)
+- [Installation](#installation)
 - [AI Setup](#ai-setup)
 - [Supported Files](#supported-files)
+- [Keyboard Shortcuts](#keyboard-shortcuts)
+- [Permissions](#permissions)
 - [API Key Security](#api-key-security)
 - [Privacy](#privacy)
 - [How Highlighting Works](#how-highlighting-works)
-- [Why a Side Panel](#why-a-side-panel)
+- [Long Documents](#long-documents)
+- [Project Structure](#project-structure)
 - [Limitations](#limitations)
 - [Troubleshooting](#troubleshooting)
 - [Development](#development)
-- [Future Improvements](#future-improvements)
+- [Changelog](#changelog)
 - [Third-Party Libraries](#third-party-libraries)
 
 ---
 
+## What's New in 2.0
+
+- **Interactive quizzes** - multiple choice with instant feedback,
+  explanations, a score screen, "retry missed", and a full answer review.
+- **Flashcards** - 3D flip cards with *Got it* / *Still learning*, shuffle,
+  a "still learning only" pass, and **export to Anki or Quizlet**.
+- **Ask** - chat with your material. Answers come from the source first,
+  and anything from general knowledge is clearly labeled.
+- **Right-click actions** - select text on any page and choose
+  **Explain with StudyLens** or **Study selected text with StudyLens**.
+- **Streaming results** - summaries and reviewers appear as they're
+  written, with real progress for long documents and a **Stop** button.
+- **Anthropic Claude** support alongside Google Gemini and OpenAI, with a
+  separate saved key for each provider and a **Test connection** button.
+- **Read PDFs open in Chrome** - on a PDF tab, "Read this PDF" downloads and
+  reads it directly.
+- **Your session survives closing the panel** (memory-only - see
+  [Privacy](#privacy)).
+- **Output language** - results in the source's language, or always in
+  English, Filipino, Spanish, and more.
+- **New interface** - dark mode, text size options, animations, rendered
+  formatting (headings, bold, lists, tables), a clickable table of
+  contents for reviewers, and rich copy that keeps formatting when pasted
+  into Google Docs or Word.
+- **Many bug fixes** - see the [Changelog](#changelog).
+
 ## Features
 
-- **Two sources, one workflow** — scan the current webpage, or upload a
-  file. Both end up as the same kind of study material, so every feature
-  below works identically either way (highlighting is the one exception,
-  since it needs a live webpage to draw on).
-- **Scan Current Page** — extracts the meaningful text of the page
-  (articles, docs, Wikipedia, tutorials) while ignoring navigation, ads,
-  cookie banners, sidebars, and other clutter.
-- **Upload File** — reads a PDF, Word, PowerPoint, TXT, Markdown, CSV, or
-  RTF file (see [Supported Files](#supported-files)), with drag-and-drop.
-- **Content preview** — shows a short excerpt and word count before doing
-  anything else, so you can confirm StudyLens found the right material.
-- **Summary** — a short topic / overview / main ideas / conclusion summary.
-- **Key Points** — a numbered list of the things you should remember.
-- **Highlight Important Parts** (webpage only) — highlights the important
-  passages directly on the page, with Previous/Next navigation and
-  one-click removal.
-- **Full Reviewer** — a structured study reviewer with three depths (Quick,
-  Standard, Comprehensive). Comprehensive is the default: it prioritizes
-  covering *every* topic in the source over keeping things short, organized
-  into numbered sections with definitions, key terms, details, and examples.
-- **Quiz Prompt / Flashcard Prompt** — ready-to-paste prompts (built
-  locally, no extra AI call) that you can drop into any AI assistant to
-  generate a quiz or flashcards from your reviewer.
-- **Copy to clipboard** on every result, formatted as clean plain text.
-- **Two AI providers** — OpenAI or Google Gemini, switchable anytime in
-  Settings with no other change needed.
-- Handles long documents by splitting them into sections before sending
-  them to the AI, and combining the results back into one deduplicated
-  answer — so a 40-page PDF doesn't just get you a reviewer of page one.
-- **Full-height side panel** — a sticky header, a scrolling middle section,
-  and a sticky "Copy" action at the bottom, so you're not endlessly
-  scrolling back up to reach the buttons you need.
+- **Three sources, one workflow** - scan the current webpage, upload a
+  file, or right-click selected text. Every study tool works the same way
+  for all three (highlighting needs a live webpage).
+- **Scan this page** - extracts the meaningful text of the page (articles,
+  docs, Wikipedia, tutorials) while ignoring navigation, ads, cookie
+  banners, sidebars, share buttons, and citation markers like `[1]`.
+- **Upload a file** - drag and drop anywhere on the panel, or browse.
+- **Summary** - topic, overview, main ideas, and conclusion.
+- **Key Points** - a numbered list of what to remember (3-15, set in
+  Settings).
+- **Reviewer** - a structured study guide in three depths (Quick,
+  Standard, Comprehensive). Comprehensive covers *every* topic with
+  definitions, key terms, details, and examples.
+- **Quiz** - 5-20 questions, Easy / Mixed / Hard. Answer options are
+  shuffled so the right answer isn't always in the same spot.
+- **Flashcards** - 10-30 cards per set.
+- **Ask** - suggested questions to get started ("What are the most likely
+  exam questions?") and a running conversation.
+- **Highlight on page** (webpages) - marks the key passages on the page
+  itself, with a clickable list, Previous/Next, and one-click removal.
+- **Copy, download, or export everything** - copy any result (formatted),
+  download it as Markdown, download flashcards for Anki/Quizlet, or
+  download a whole **study pack** with every result in one file.
+- **Prompts for other assistants** - copy a ready-made quiz or flashcard
+  prompt to paste into ChatGPT, Gemini, or Claude.
 
-## Technology
+## Installation
 
-- HTML, CSS, and vanilla JavaScript only — no React, Vue, Angular, or
-  TypeScript.
-- Chrome Extension **Manifest V3**, using the **Side Panel API**.
-- Two AI providers implemented: **OpenAI** (`gpt-4o-mini` via the Chat
-  Completions API) and **Google Gemini** (`gemini-3.1-flash-lite` via the
-  Generative Language API). The AI integration is isolated in `aiService.js`
-  so another provider can be added later without touching the UI code.
-- Three small, vendored libraries handle file parsing entirely inside the
-  browser — see [Third-Party Libraries](#third-party-libraries).
+1. Download this repository (Code → Download ZIP) and unzip it, or clone it.
+2. Open Google Chrome (version 116 or newer) and go to `chrome://extensions/`.
+3. Turn on **Developer mode** (top-right toggle).
+4. Click **Load unpacked** and select the StudyLens folder (the one that
+   contains `manifest.json`).
+5. Pin StudyLens to the toolbar (puzzle-piece icon → pin).
+6. Click the StudyLens icon (or press **Alt+Shift+S**) to open the side panel.
 
-## Project Structure
-
-```
-studylens/
-├── manifest.json          Extension configuration (Manifest V3, side panel)
-├── constants.js            Shared message names, storage keys, defaults,
-│                            file-upload settings (size limit, extensions)
-├── background.js           Service worker: routes AI requests to aiService.js,
-│                            opens the side panel when the toolbar icon is clicked
-├── aiService.js             All AI provider logic + prompt templates
-├── content.js               Injected into the page on demand: reads text,
-│                            creates/removes/navigates highlights
-├── highlight.css            Styles for on-page highlights (injected on demand)
-├── sidepanel/
-│   ├── sidepanel.html       Main StudyLens interface (full-height)
-│   ├── sidepanel.css        Design tokens, sticky header/footer layout
-│   ├── sidepanel.js         UI logic / state for both sources (page + file)
-│   └── fileParser.js        Turns an uploaded File into clean text (PDF/DOCX/
-│                            PPTX/TXT/MD/CSV/RTF) - see File Extraction vs AI
-│                            Analysis below
-├── options/
-│   ├── options.html         Settings page
-│   ├── options.css
-│   └── options.js
-├── vendor/                  Local, offline copies of the three parsing
-│   ├── pdfjs/                libraries below - never fetched over the network
-│   ├── mammoth/               at runtime (see Third-Party Libraries)
-│   ├── jszip/
-│   └── papaparse/
-├── icons/
-│   ├── icon16.png / icon48.png / icon128.png / logo_mark.png / logo_full.png
-└── README.md
-```
-
-**How the pieces talk to each other:**
-
-```
-Side panel ──(chrome.tabs.sendMessage)──►  Content script (on the page)
-  │            READ_PAGE, HIGHLIGHT_CONTENT, REMOVE_HIGHLIGHTS, SCROLL_TO_HIGHLIGHT
-  │
-  ├──(local, no messaging)──►  fileParser.js  (uploaded file → text, runs in the panel itself)
-  │
-  └──(chrome.runtime.sendMessage)──►  Background service worker  ──►  aiService.js  ──►  AI provider
-               GENERATE_SUMMARY, GENERATE_KEY_POINTS, GENERATE_REVIEWER, GENERATE_HIGHLIGHT_PHRASES
-```
-
-Whether text came from a webpage or a file, it becomes the same shape in
-`sidepanel.js` (`activeContent.textContent`), so `GENERATE_SUMMARY`,
-`GENERATE_KEY_POINTS`, and `GENERATE_REVIEWER` don't know or care which
-source it came from — that's the same background/AI code the extension has
-always used, just fed from a second place.
-
-The content script is **not** listed in the manifest as an always-on
-script. It's injected only when you click "Scan Current Page," using the
-minimal `activeTab` + `scripting` permissions — StudyLens has no access to
-any page until you ask it to read one.
-
-## Installation (Chrome Setup)
-
-1. Download or clone the StudyLens folder.
-2. Open Google Chrome.
-3. Go to `chrome://extensions/`.
-4. Turn on **Developer mode** (top-right toggle).
-5. Click **Load unpacked**.
-6. Select the `studylens` project folder.
-7. Pin StudyLens to the toolbar (puzzle-piece icon → pin).
-8. Click the StudyLens icon — this opens the **side panel** on the right
-   side of the window (not a small popup).
-9. Choose **Webpage** and click **Scan Current Page**, or choose **File**
-   and upload a document.
+To update after pulling new code, click the reload icon on the StudyLens
+card in `chrome://extensions/`.
 
 ## AI Setup
 
-StudyLens needs an AI API key to generate summaries, key points,
-highlights, and reviewers (the Quiz Prompt / Flashcard Prompt buttons do
-**not** need a key — they just assemble text you already generated).
+StudyLens uses your own API key. Click the **settings** icon in the panel
+header (or right-click the extension icon → Options), choose a provider,
+paste your key, and click **Test connection**. Changes save automatically.
 
-**Option A — OpenAI**
-1. Get an API key from [platform.openai.com](https://platform.openai.com/).
-2. Make sure billing/quota is set up on the account — a key with no quota
-   will fail (see the error table below).
+| Provider | Get a key | Default model | Notes |
+|---|---|---|---|
+| **Google Gemini** | [aistudio.google.com/apikey](https://aistudio.google.com/apikey) | `gemini-3.1-flash-lite` | Has a free tier (per-minute and daily limits). Easiest way to start. |
+| **OpenAI** | [platform.openai.com/api-keys](https://platform.openai.com/api-keys) | `gpt-4o-mini` | Needs billing set up on your account. |
+| **Anthropic Claude** | [console.anthropic.com/settings/keys](https://console.anthropic.com/settings/keys) | `claude-opus-5-5` | Needs credits on your account. |
 
-**Option B — Google Gemini (has a free tier)**
-1. Get a free API key from
-   [aistudio.google.com/apikey](https://aistudio.google.com/apikey).
-2. Gemini's free tier has daily/per-minute limits, so heavy use may need to
-   wait for the limit to reset or a paid tier.
+Each provider keeps its own key, so you can switch between them without
+re-entering anything. The optional **Model** field lets you use a
+different model, or recover if a provider retires the default model name.
 
-Either way:
+The "Copy quiz/flashcard prompt" buttons don't need a key - they just
+assemble text for you to paste into another assistant.
 
-3. Click **⚙** in the StudyLens side panel header (or right-click the
-   extension icon → Options).
-4. Choose your **Provider**, paste in your key, and click **Save Settings**.
+### Understanding rate-limit and quota errors
 
-Anthropic is shown as a "coming soon" placeholder to make it clear how a
-future provider would be added (see `aiService.js`).
-
-### Understanding rate-limit / quota errors
-
-Both OpenAI and Gemini return the same HTTP status (429) for two different
-problems, so StudyLens reads the response to tell you which one actually
-happened instead of showing one vague message for both:
+Providers use the same HTTP error (429) for two different problems, so
+StudyLens reads the response to tell you which one happened:
 
 | Message | What it means | What to do |
 |---|---|---|
-| "…has no available quota…" / "…run out of free quota…" | Your account has no credit or has hit its daily free limit. | Add billing (OpenAI) or wait for the daily reset / upgrade (Gemini), or switch providers in Settings. |
-| "…rate-limited right now…" | You're sending requests faster than your plan allows per minute. | Wait a few seconds and try again. |
-| "…rejected your API key…" | The key is missing, mistyped, or revoked. | Re-check the key on the Settings page. |
+| "…free tier allows a limited number of requests per minute…" / "…rate-limiting…" | Too many requests too quickly. StudyLens retries short waits automatically. | Wait a moment and try again. |
+| "…used today's free Gemini quota…" / "…no available quota…" / "…enough credits…" | Your account's daily limit or balance is used up. | Wait for the reset, add billing/credits, or switch providers. |
+| "…rejected your API key…" | The key is missing, mistyped, or revoked. | Re-check it in Settings and use **Test connection**. |
 
 ## Supported Files
 
 | Format | Extension | How it's read |
 |---|---|---|
-| PDF | `.pdf` | Text extracted page by page with [pdf.js](https://mozilla.github.io/pdf.js/). Scanned/image-only PDFs are detected and reported rather than silently producing an empty reviewer (no OCR in this version). Password-protected PDFs are also detected and reported. |
-| Word | `.docx` | Converted to HTML with [Mammoth](https://github.com/mwilliamson/mammoth.js), then walked the same way `content.js` walks a webpage - headings, paragraphs, lists, and tables come out structured, not as one wall of text. |
-| PowerPoint | `.pptx` | Read as a zip of slide XML (via [JSZip](https://stuk.github.io/jszip/)) — each slide's text and speaker notes are extracted and clearly labeled `SLIDE 1`, `SLIDE 2`, etc., so the reviewer understands the presentation's structure. |
+| PDF | `.pdf` | Text extracted page by page with [pdf.js](https://mozilla.github.io/pdf.js/), keeping line breaks. Scanned (image-only) and password-protected PDFs are detected and explained. |
+| Word | `.docx` | Converted with [Mammoth](https://github.com/mwilliamson/mammoth.js); titles, headings, nested lists, and tables keep their structure. |
+| PowerPoint | `.pptx` | Read with [JSZip](https://stuk.github.io/jszip/). Slides come out in their **real presentation order**, with titles and each slide's own speaker notes. |
 | Plain text | `.txt` | Read directly. |
-| Markdown | `.md` | Read directly, with heading/list/bold/link syntax lightly stripped so the AI sees clean prose instead of `##`/`**`/`[]()` symbols. |
-| CSV | `.csv` | Parsed with [PapaParse](https://www.papaparse.com/) and turned into `Column: value` lines per row (capped at 500 rows so a huge spreadsheet doesn't overwhelm the reviewer). |
-| RTF | `.rtf` | A small best-effort control-word stripper (no vendored RTF library) - formatting-heavy RTF files may not extract perfectly; StudyLens says so when this path is used. |
+| Markdown | `.md` | Headings and lists are kept; links, images, front matter, and HTML are cleaned up. |
+| CSV | `.csv` | Parsed with [PapaParse](https://www.papaparse.com/) into `Column: value` lines (first 500 rows). |
+| RTF | `.rtf` | A built-in best-effort reader that skips font/color tables and decodes accented characters. |
+| HTML | `.html`, `.htm` | Saved web pages, read like a scanned page. |
 
-**Limits:** 25 MB per file. Unsupported formats and oversized files are
-rejected immediately with a plain-language message — StudyLens never
-silently fails or produces an empty reviewer.
+**Limit:** 25 MB per file. Files are read entirely inside your browser.
+
+## Keyboard Shortcuts
+
+| Where | Keys |
+|---|---|
+| Anywhere | **Alt+Shift+S** opens StudyLens (change it at `chrome://extensions/shortcuts`) |
+| Any page | Select text → right-click → **Explain with StudyLens** / **Study selected text with StudyLens** |
+| Quiz | **A-D** (or **1-4**) to answer, **Enter** for next, **←** to go back |
+| Flashcards | **Space** flip, **← →** move, **1** still learning, **2** got it |
+| Ask | **Enter** to send, **Shift+Enter** for a new line |
+
+## Permissions
+
+| Permission | Why |
+|---|---|
+| `activeTab`, `scripting` | Read the page you're on - only when you click **Scan** - and draw highlights on it. |
+| `sidePanel` | Show StudyLens in Chrome's side panel. |
+| `storage` | Save your settings, and keep your current session in memory. |
+| `contextMenus` | The right-click "Explain / Study selected text" items. |
+| Host access to `api.openai.com`, `generativelanguage.googleapis.com`, `api.anthropic.com` | Send your request to the AI provider you chose. |
+| **Optional:** access to all sites | Only if you click **Let StudyLens read any tab I scan**. Without it, Chrome only lets StudyLens read a tab after you click the toolbar icon on that tab. Even with it, StudyLens never reads a page until you click Scan. |
 
 ## API Key Security
 
-- The key is **never hard-coded** anywhere in the source.
-- It is stored only in `chrome.storage.local`, on your own device.
-- It is sent **directly from your browser to the AI provider** you chose
-  (OpenAI or Google) — never to any StudyLens/Anthropic server, because
-  there isn't one.
-- **This is a local prototype, not a production security model.** A key
-  stored inside a browser extension is readable by anyone with access to
-  that browser profile. For a real product used by other people, the AI
-  request should go through your own backend server that holds the key,
-  instead of the extension calling the AI provider directly.
+- Keys are **never hard-coded**. They're stored only in
+  `chrome.storage.local` on your device.
+- Requests go **directly from your browser to the provider** you chose -
+  there is no StudyLens server.
+- A key stored in a browser extension can be read by anyone with access to
+  that browser profile. Use a key with a sensible spending limit, and don't
+  leave one on a shared computer.
+- For a product used by other people, AI requests should go through your
+  own backend that holds the key.
 - Never commit a filled-in API key to a public repository.
 
 ## Privacy
 
-StudyLens only touches a webpage when you explicitly click "Scan Current
-Page," and only reads a file when you choose to upload one. It does
-**not**:
+StudyLens only reads a webpage when you click **Scan this page**, only
+reads a file when you choose one, and only reads selected text when you
+use the right-click menu. It does **not** monitor pages, track your
+browsing history, read other tabs, or use your camera, microphone, or
+location.
 
-- Continuously monitor webpages or run in the background
-- Track or store your browsing history
-- Read other open tabs
-- Access your camera, microphone, or location
-- Collect cookies or passwords
-
-**Uploaded files never leave your computer as files.** PDF/DOCX/PPTX/CSV
-parsing happens entirely inside the side panel using the vendored libraries
-in `/vendor` — nothing is uploaded to a server to be parsed. Only the
-**extracted text** (from a webpage or a file) is sent anywhere, and only to
-the AI provider you configured, and only when you click a study feature
-(Summary, Key Points, Full Reviewer, Highlight).
-
-The only things saved to `chrome.storage.local` are your **settings**
-(provider, API key, reviewer mode, key point count, confirmation
-preference) and a flag noting you've seen the onboarding message. Extracted
-text, results, and highlights live only in the side panel while it's open
-and are discarded when it closes. Use **Settings → Clear all StudyLens data
-on this device** at any time to remove everything StudyLens has stored.
-
-Before the first AI-powered action, StudyLens shows a plain-language notice
-that the extracted text will be sent to your chosen AI provider, with a
-Continue/Cancel choice. You can turn this notice off in Settings once you
-understand it.
+- **Files never leave your computer as files.** Parsing happens inside the
+  side panel using the libraries in `/vendor`.
+- **Only extracted text is sent**, only to your chosen AI provider, and only
+  when you use a study tool. By default StudyLens asks before the first
+  request in each panel session (you can turn this off in Settings).
+- **Your current session** (source text and results) is kept in
+  `chrome.storage.session`, which Chrome holds **in memory only**. It
+  survives closing and reopening the panel, and is erased when you close the
+  browser. It is never written to disk.
+- **Settings** (provider, keys, preferences) are saved in
+  `chrome.storage.local`.
+- **Settings → Clear all StudyLens data on this device** removes everything.
 
 ## How Highlighting Works
 
-Highlighting only applies to a scanned webpage (a file has no live page to
-draw on). StudyLens asks the AI to return a handful of **exact quotes**
-from the page (not paraphrases). The content script then searches the
-page's actual text nodes for each quote and wraps the match in a `<mark>`
-element — it never rewrites the page's HTML wholesale. "Remove Highlights"
-unwraps those `<mark>` elements and merges the text back together,
-restoring the page to its original state. Links, images, and existing
-formatting are left alone.
+StudyLens asks the AI for a handful of **exact quotes** from the page. The
+content script flattens the page's visible text into one normalized string
+(ignoring differences in spacing, curly quotes, and dashes, and skipping
+citation markers like `[1]`) while remembering which text node each
+character came from. That lets a quote match even when it runs through
+links, bold words, or other inline formatting. Each match is wrapped in one
+`<mark>` per text node it touches.
 
-**Limitation:** a quote that is split across multiple inline elements in
-the original HTML (for example, part of it inside a `<b>` tag) may not
-match. This trade-off keeps the highlighting code simple and safe rather
-than rewriting arbitrary page structure.
+The page's HTML is never rewritten wholesale. **Remove** unwraps the marks
+and restores the original text nodes exactly. If the AI changes a word near
+the end of a long quote, StudyLens falls back to matching the start of it.
 
-## Why a Side Panel
+## Long Documents
 
-Chrome popups are capped at a small fixed size, which meant the original
-StudyLens popup needed constant scrolling once file upload, source
-switching, and a full reviewer were added. Chrome's Side Panel API gives
-StudyLens the full height of the browser window instead, with a layout of:
+Text up to ~48,000 characters (roughly 25-30 pages) is handled in a single
+request. Longer sources are read in parts - two at a time, with progress
+shown - and the notes from each part are combined into one result, so a
+long PDF gets a reviewer of the whole thing, not just page one. Quizzes and
+flashcards spread their questions across all parts. **Ask** picks the most
+relevant passages for each question.
 
-- a **sticky header** (logo + Settings, always visible)
-- a **scrolling middle section** (source, preview, study tools, results)
-- a **sticky footer** with the primary **Copy** action, so it's always
-  reachable without scrolling back up
+## Project Structure
 
-The side panel also stays open while you browse, switch tabs, and read —
-unlike a popup, which closes the moment it loses focus.
+```
+studylens/
+├── manifest.json          Manifest V3 configuration
+├── constants.js           Shared names, provider info, default settings, limits
+├── background.js          Service worker: install/upgrade, toolbar → side panel,
+│                          right-click menu
+├── aiService.js           All AI logic: providers (Gemini/OpenAI/Claude),
+│                          streaming, retries, chunking, prompts
+├── content.js             Injected on demand: reads the page, highlights passages
+├── highlight.css          On-page highlight styles (injected on demand)
+├── sidepanel/
+│   ├── sidepanel.html     Panel layout and icon set
+│   ├── sidepanel.css      Design tokens (light/dark), layout, animations
+│   ├── sidepanel.js       Panel state, sources, jobs, views, export
+│   ├── studyModes.js      Interactive quiz and flashcards
+│   ├── markdown.js        Safe Markdown renderer for AI output
+│   └── fileParser.js      File → text (PDF/DOCX/PPTX/TXT/MD/CSV/RTF/HTML)
+├── options/               Settings page
+├── vendor/                pdf.js, Mammoth, JSZip, PapaParse (local copies)
+└── icons/
+```
+
+**How the pieces talk to each other:**
+
+```
+Side panel ──(chrome.tabs.sendMessage)──► content.js on the page
+  │          READ_PAGE, HIGHLIGHT_CONTENT, SCROLL_TO_HIGHLIGHT, REMOVE_HIGHLIGHTS, HIGHLIGHT_STATUS
+  │
+  ├── fileParser.js   (file → text, inside the panel)
+  ├── aiService.js    (panel → AI provider, streamed)
+  │
+Background ──(chrome.storage.session)──► Side panel
+             right-click "Explain" / "Study selected text"
+```
+
+**Why AI requests run in the side panel, not the background worker:**
+Chrome stops an extension's service worker when a single network response
+takes more than 30 seconds, which a comprehensive reviewer of a long
+document can easily do. In 1.x this surfaced as random "message port
+closed" failures. Running requests in the panel avoids that, and makes
+streaming and the Stop button possible.
 
 ## Limitations
 
-- **No OCR.** Scanned/image-only PDFs are detected and reported, not
-  processed — StudyLens tells you rather than producing an empty reviewer.
-- **PPTX slide order** is inferred from the slide files' internal numbering
-  in the `.pptx` zip, which is almost always the real presentation order
-  but in rare cases (slides manually reordered in a way that didn't rename
-  the underlying files) could differ from what you see when presenting.
-- **RTF** uses a small best-effort text stripper, not a full RTF parser -
-  heavily-formatted RTF files may lose some content. Prefer DOCX or PDF
-  when you have the choice.
-- **CSV** is capped at 500 data rows to keep a reviewer generated from a
-  huge spreadsheet readable; StudyLens tells you when it truncates.
-- **Switching tabs while the panel is open:** StudyLens deliberately
-  requests only the minimal `activeTab` permission (not full `tabs`
-  access), which Chrome grants for whatever tab was active when you *click
-  the StudyLens toolbar icon*. Because the side panel stays open across tab
-  switches, if you switch to a different tab without re-clicking the
-  toolbar icon, "Scan Current Page" may show *"StudyLens needs permission
-  to read this tab."* Clicking the toolbar icon again fixes this instantly
-  — it's the trade-off for not requesting a broader permission just to
-  read tab titles/URLs it doesn't otherwise need.
-- File parsing runs entirely in the side panel's own document (not a
-  background worker), so extraction pauses if you close the panel
-  mid-extraction — reopen it and try again.
+- **No OCR.** Scanned/image-only PDFs are detected and explained, not read.
+- **Google Docs** draws its text in a way extensions can't read. Use File →
+  Download (.docx/.pdf) and upload it - StudyLens shows this hint on Docs pages.
+- **Chrome pages** (`chrome://`, the Web Store, other extensions) can't be
+  read by any extension.
+- **Local files opened in Chrome** (`file://`) need "Allow access to file
+  URLs" turned on for StudyLens in `chrome://extensions`, or you can upload
+  the file instead.
+- **RTF** support is best-effort; DOCX or PDF is more reliable.
+- **CSV** is capped at 500 rows.
+- **Highlights** disappear if the page reloads or navigates (StudyLens
+  notices and resets the navigator).
 
 ## Troubleshooting
 
-| Problem | What's happening | Try this |
-|---|---|---|
-| "This page cannot be read by StudyLens." | You're on a `chrome://`, extension, or Chrome Web Store page. | Open a normal webpage, or switch to the File source instead. |
-| "StudyLens needs permission to read this tab." / "…lost permission to read this tab." | The panel is looking at a different tab than the one that opened it (see Limitations). | Click the StudyLens icon in the toolbar, then try again. |
-| "Not enough readable content was found on this page." | The page has very little text StudyLens could find. | Open the main article, not a listing/homepage. |
-| "Unsupported file type" | The file isn't PDF/DOCX/PPTX/TXT/MD/CSV/RTF. | Convert or export it to a supported format. |
-| "File is too large." | The file is over 25 MB. | Split it, or upload a smaller version. |
-| "This PDF appears to contain scanned images…" | The PDF has no selectable text (it's images of pages). | Use a text-based PDF, or run OCR yourself first with another tool. |
-| "This file appears to be password-protected…" | The PDF/document is locked. | Remove the password and re-upload. |
-| "Add an AI API key in Settings…" | No key saved yet. | Add one in Settings (see AI Setup above). |
-| "…rejected your API key." | The key is invalid, expired, or has no quota. | Check the key at platform.openai.com or aistudio.google.com/apikey. |
-| "…has no available quota…" | Billing/free-tier limit reached, not a temporary rate limit. | See "Understanding rate-limit / quota errors" above. |
-| Highlights don't appear | The AI's quotes didn't match the page text exactly. | Try again — regenerate uses a fresh set of quotes. |
-
-If you ever see a raw technical error in the console, please note it and
-open an issue — study features should always fail with a plain-language
-message, never a stack trace, inside the panel itself.
+| Problem | Try this |
+|---|---|
+| "StudyLens doesn't have permission to read this tab" | Click the StudyLens toolbar icon while on that tab, then scan again - or click **Let StudyLens read any tab I scan**. |
+| "Only N words of readable text were found" | Open the main article (not a homepage or listing), or use the File tab. |
+| "Chrome doesn't let extensions read this kind of page" | It's a Chrome-internal page. Open a normal webpage or upload a file. |
+| A PDF tab won't read | Allow access to all sites, or save the PDF and upload it. |
+| "This PDF looks like scanned images" | Use a text-based PDF, or run OCR in another tool first. |
+| "…rejected your API key" | Re-check the key in Settings and click **Test connection**. |
+| Model not found | Clear the **Model** field to use the default, or enter a current model name. |
+| Highlights don't appear | Click **Highlight on page** again for a fresh set of passages. |
+| The panel says it's still working | Click **Stop** on the progress bar. |
 
 ## Development
 
-- All AI logic lives in `aiService.js`. To add a provider, implement a new
-  entry in the `PROVIDERS` object with the same `(apiKey, messages) =>
-  string` shape, then add it to the Settings provider dropdown.
-- All file-parsing logic lives in `sidepanel/fileParser.js`, kept
-  deliberately separate from both the AI logic and the UI (see
-  `constants.js` → `FILE_SUPPORT` for the extension list and size limit):
-  **file parser** extracts text → **aiService** understands/organizes it →
-  **sidepanel.js** displays it. To support a new file type, add a `parseX`
-  function there and one line in `extractFileContent`'s dispatcher.
-- Message names live in `constants.js` so side panel/background/content
-  code stays in sync.
-- The content script re-declares a small local copy of the message names
-  instead of importing `constants.js`, since content scripts run in an
-  isolated world and this keeps `content.js` a single, self-contained file
-  that's easy to read top to bottom.
-- No build step — reload the unpacked extension from `chrome://extensions/`
-  after editing files.
+- No build step: edit files, then reload the extension in `chrome://extensions/`.
+- **Add an AI provider:** add an entry to `AI_PROVIDER_INFO` in
+  `constants.js` and a function to `PROVIDERS` in `aiService.js` that
+  streams text and calls `opts.onToken(fullText)`. The Settings page picks
+  it up automatically.
+- **Add a file type:** add a `parseX` function in `sidepanel/fileParser.js`
+  and one branch in `extractFileContent`, plus the extension in
+  `FILE_SUPPORT` (`constants.js`).
+- `content.js` keeps its own copy of the message names, since content
+  scripts run in an isolated world and this keeps the file self-contained.
+- AI output is always rendered through `sidepanel/markdown.js`, which
+  escapes HTML first - never insert model output with `innerHTML` directly.
 
-## Future Improvements
+## Changelog
 
-StudyLens is intentionally scoped small for this prototype. The project is
-structured so these could be added later without a rewrite:
+### 2.0.0
 
-- OCR for scanned PDFs
-- Saved reviewers and study history
-- Direct in-panel quiz/flashcard generation (beyond the copy-paste prompts)
-- Additional AI providers (Anthropic)
-- Custom prompt templates
-- YouTube transcript support
-- Notes, export to TXT/Markdown/PDF
-- Dark mode
-- Cloud sync across devices
-- A "Cancel" control for long file-extraction/AI operations (today, closing
-  and reopening the panel is the way to stop an in-progress request)
+New: interactive quiz, flashcards (with Anki/Quizlet export), Ask chat,
+right-click Explain / Study selected text, streaming results with Stop,
+Anthropic Claude provider, per-provider keys, Test connection, model
+override, output language, reading PDFs open in a tab, session restore,
+dark mode, text size, study pack export, rich copy, keyboard shortcuts, and
+a redesigned, animated interface.
+
+Fixed:
+
+- Long AI requests failed with "message port closed" because Chrome stopped
+  the background service worker after 30 seconds. Requests now run in the
+  side panel.
+- Adding an API key in Settings didn't reach an already-open panel until it
+  was reopened - and changing the reviewer depth in the panel could
+  **overwrite the newly saved key** with the old, empty one.
+- Settings page: after "Clear all data," every button got a second click
+  handler, so **Show/Hide** stopped working and saves ran twice.
+- Highlighting almost never worked on real pages: quotes that crossed a link
+  or bold word couldn't match, and a word like "menu" or "header" anywhere
+  in the page's `<body>` classes (common on Wikipedia and many blogs) blocked
+  highlighting for the entire page.
+- Page reading dropped text placed directly inside `<div>`s, and treated
+  elements such as "canvas" or "has-sidebar" as navigation junk.
+- After the extension was reloaded, scanning a previously scanned page
+  failed until the page was refreshed.
+- Every PDF failed after extraction in the bundled pdf.js version, and the
+  raw error was shown to the student.
+- PowerPoint slides came out in file order instead of presentation order,
+  and speaker notes could be attached to the wrong slide.
+- Nested lists lost their structure, RTF files leaked font names into the
+  text, and Word's Title style was treated as body text.
+- Long toast messages ran off the edge of the panel, and dropping a file
+  outside the drop area navigated the panel away.
+- Switching browser tabs erased all generated results; they're now kept
+  until you start a new session.
+- Tab tracking reacted to tabs in other browser windows.
+
+### 1.0.0
+
+Initial release.
 
 ## Third-Party Libraries
 
-Vendored locally under `/vendor` (no CDN, no remote code fetched at
-runtime — required for Manifest V3 and better for privacy/reliability).
-Each folder includes that project's original license file.
+Vendored locally under `/vendor` (no CDN, no remote code at runtime -
+required for Manifest V3). Each folder includes the project's license.
 
 | Library | Version | Used for | License |
 |---|---|---|---|
 | [pdf.js](https://mozilla.github.io/pdf.js/) | 6.3.289 | PDF text extraction | Apache-2.0 |
 | [Mammoth](https://github.com/mwilliamson/mammoth.js) | 1.12.2 | DOCX → HTML conversion | BSD-2-Clause |
-| [JSZip](https://stuk.github.io/jszip/) | 3.10.1 | Reading `.pptx` files as zip archives | MIT / GPLv3 (dual) |
+| [JSZip](https://stuk.github.io/jszip/) | 3.10.1 | Reading `.pptx` files | MIT / GPLv3 (dual) |
 | [PapaParse](https://www.papaparse.com/) | 5.7.0 | CSV parsing | MIT |

@@ -952,7 +952,14 @@ button { font: inherit; color: inherit; }
 
 /* ---------------- Results ---------------- */
 
-.result-card { padding-top: 0; animation: rise-in 0.4s var(--ease) both; }
+/* Tall enough to scroll to the top of the panel, so a new result always
+   lands in full view instead of peeking in from the bottom. */
+.result-card {
+  padding-top: 0;
+  min-height: calc(100vh - 150px);
+  min-height: calc(100dvh - 150px);
+  animation: rise-in 0.4s var(--ease) both;
+}
 
 .result-tabs {
   position: sticky;
@@ -967,6 +974,10 @@ button { font: inherit; color: inherit; }
   background: var(--surface);
   border-bottom: 1px solid var(--line);
   border-radius: var(--radius) var(--radius) 0 0;
+  /* Fade the right edge to hint that more tabs scroll into view. */
+  -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 24px), transparent);
+  mask-image: linear-gradient(90deg, #000 calc(100% - 24px), transparent);
+  scroll-padding-inline: 12px 28px;
 }
 
 .result-tabs::-webkit-scrollbar { display: none; }
@@ -1367,7 +1378,7 @@ button { font: inherit; color: inherit; }
 .fc-hint { display: inline-flex; gap: 4px; align-items: center; font-size: 0.75rem; color: var(--muted); }
 
 .fc-controls { display: flex; align-items: center; gap: 6px; margin-top: 12px; }
-.fc-controls .btn { flex: 1; }
+.fc-controls .btn { flex: 1; padding-left: 8px; padding-right: 8px; white-space: nowrap; }
 
 .fc-tools { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; margin-top: 10px; }
 
@@ -1499,14 +1510,15 @@ button { font: inherit; color: inherit; }
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
+  width: 30px;
+  height: 30px;
   border-radius: 999px;
   border: 1px solid var(--line);
   background: var(--surface);
   color: var(--ink);
   box-shadow: var(--shadow-md);
   cursor: pointer;
+  font-size: 0.85rem;
   opacity: 0;
   transform: translateY(10px) scale(0.9);
   pointer-events: none;
@@ -1514,7 +1526,7 @@ button { font: inherit; color: inherit; }
   z-index: 4;
 }
 
-.to-top.is-visible { opacity: 1; transform: none; pointer-events: auto; }
+.to-top.is-visible { opacity: 0.92; transform: none; pointer-events: auto; }
 .app-footer.hidden ~ .to-top, .to-top.no-footer { bottom: 16px; }
 
 /* ---------------- Toasts ---------------- */

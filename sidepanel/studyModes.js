@@ -436,7 +436,7 @@ const StudyModes = (() => {
         flashcard,
         h("div", { className: "fc-controls" }, [
           h("button", { type: "button", className: "icon-btn", "aria-label": "Previous card", title: "Previous (←)", onClick: () => move(-1) }, icon("chevron-left")),
-          h("button", { type: "button", className: "btn btn-secondary fc-learning", title: "Still learning (1)", onClick: () => mark(false) }, [icon("rotate"), h("span", { text: "Still learning" })]),
+          h("button", { type: "button", className: "btn btn-secondary fc-learning", title: "Still learning (1)", onClick: () => mark(false) }, h("span", { text: "Still learning" })),
           h("button", { type: "button", className: "btn btn-primary fc-gotit", title: "Got it (2)", onClick: () => mark(true) }, [icon("check"), h("span", { text: "Got it" })]),
           h("button", { type: "button", className: "icon-btn", "aria-label": "Next card", title: "Next (→)", onClick: () => move(1) }, icon("chevron-right"))
         ]),
